@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { XIcon, AlertTriangleIcon, ClockCircleIcon, WrenchIcon } from '../icons';
+import { DEVICE_STATUSES, ALERT_LEVELS, getStatusConfig } from '../constants';
 import { deviceApi } from '../api';
 import type { Device } from '../types';
 
@@ -8,19 +9,6 @@ interface DeviceDetailProps {
   onClose: () => void;
   onCreateWorkOrder?: (deviceId: string) => void;
 }
-
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  normal: { label: '正常', color: '#52c41a' },
-  warning: { label: '告警', color: '#faad14' },
-  fault: { label: '故障', color: '#ff4d4f' },
-  offline: { label: '离线', color: '#d9d9d9' },
-};
-
-const ALERT_LEVEL_LABELS: Record<string, { label: string; color: string }> = {
-  critical: { label: '严重', color: '#ff4d4f' },
-  warning: { label: '警告', color: '#faad14' },
-  info: { label: '信息', color: '#1890ff' },
-};
 
 export function DeviceDetail({ device, onClose, onCreateWorkOrder }: DeviceDetailProps) {
   const [deviceWithAlerts, setDeviceWithAlerts] = useState<Device | null>(null);
@@ -42,7 +30,8 @@ export function DeviceDetail({ device, onClose, onCreateWorkOrder }: DeviceDetai
     fetchDeviceDetail();
   }, [device.id, device]);
 
-  const status = STATUS_LABELS[device.status];
+  const status = getStatusConfig(DEVICE_STATUSES, device.status);
+
   const formatFloor = (floor: number) => {
     if (floor < 0) return `地下${Math.abs(floor)}层`;
     return `${floor}层`;
@@ -135,7 +124,7 @@ export function DeviceDetail({ device, onClose, onCreateWorkOrder }: DeviceDetai
                     display: 'inline-block',
                     padding: '2px 8px',
                     borderRadius: '4px',
-                    backgroundColor: `${status.color}20`,
+                    backgroundColor: status.bgColor,
                     color: status.color,
                     fontSize: '12px',
                   }}
@@ -160,7 +149,7 @@ export function DeviceDetail({ device, onClose, onCreateWorkOrder }: DeviceDetai
               {deviceWithAlerts?.alerts && deviceWithAlerts.alerts.length > 0 ? (
                 <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                   {deviceWithAlerts.alerts.map((alert) => {
-                    const level = ALERT_LEVEL_LABELS[alert.level];
+                    const level = ALERT_LEVELS[alert.level] || { label: alert.level, color: '#999' };
                     return (
                       <div
                         key={alert.id}

@@ -5,28 +5,36 @@ export interface Building {
   deviceCount: number;
 }
 
+export type DeviceStatus = 'normal' | 'warning' | 'fault' | 'offline';
+export type DeviceType = 'elevator' | 'hvac' | 'pump' | 'lighting' | 'fire_pressure';
+
 export interface Device {
   id: string;
   name: string;
-  type: 'elevator' | 'hvac' | 'pump' | 'lighting' | 'fire_pressure';
+  type: DeviceType;
   typeName: string;
   buildingId: string;
   floor: number;
-  status: 'normal' | 'warning' | 'fault' | 'offline';
+  status: DeviceStatus;
   lastUpdated: string;
   alerts?: Alert[];
 }
+
+export type AlertLevel = 'critical' | 'warning' | 'info';
 
 export interface Alert {
   id: string;
   deviceId: string;
   deviceName: string;
   buildingId?: string;
-  level: 'critical' | 'warning' | 'info';
+  level: AlertLevel;
   message: string;
   timestamp: string;
   acknowledged: boolean;
 }
+
+export type WorkOrderStatus = 'pending' | 'assigned' | 'in_progress' | 'completed';
+export type WorkOrderPriority = 'high' | 'medium' | 'low';
 
 export interface WorkOrder {
   id: string;
@@ -34,10 +42,11 @@ export interface WorkOrder {
   description: string;
   deviceId: string;
   deviceName: string;
-  status: 'pending' | 'assigned' | 'in_progress' | 'completed';
-  priority: 'high' | 'medium' | 'low';
+  status: WorkOrderStatus;
+  priority: WorkOrderPriority;
   createdAt: string;
   updatedAt: string;
+  processLogs?: { timestamp: string; action: string }[];
 }
 
 export interface ChatMessage {
@@ -60,11 +69,11 @@ export interface CreateWorkOrderRequest {
   title: string;
   description: string;
   deviceId: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: WorkOrderPriority;
 }
 
 export interface UpdateWorkOrderRequest {
-  status: 'pending' | 'assigned' | 'in_progress' | 'completed';
+  status: WorkOrderStatus;
 }
 
 export interface ErrorResponse {

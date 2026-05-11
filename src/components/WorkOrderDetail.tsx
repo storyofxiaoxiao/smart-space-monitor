@@ -1,4 +1,5 @@
 import { XIcon, CheckCircleIcon, AlertCircleIcon, ClockCircleIcon, WrenchIcon, ToolIcon } from '../icons';
+import { WORK_ORDER_STATUSES, WORK_ORDER_PRIORITIES, getStatusConfig } from '../constants';
 import type { WorkOrder } from '../types';
 
 interface WorkOrderDetailProps {
@@ -6,22 +7,12 @@ interface WorkOrderDetailProps {
   onClose: () => void;
 }
 
-const STATUS_LABELS: Record<string, { label: string; color: string; bgColor: string; icon: typeof CheckCircleIcon }> = {
-  pending: { label: '待处理', color: '#faad14', bgColor: '#fffbe6', icon: ClockCircleIcon },
-  processing: { label: '处理中', color: '#1890ff', bgColor: '#e6f7ff', icon: AlertCircleIcon },
-  completed: { label: '已完成', color: '#52c41a', bgColor: '#f6ffed', icon: CheckCircleIcon },
-};
-
-const PRIORITY_LABELS: Record<string, { label: string; color: string }> = {
-  high: { label: '高', color: '#ff4d4f' },
-  medium: { label: '中', color: '#faad14' },
-  low: { label: '低', color: '#52c41a' },
-};
-
 export function WorkOrderDetail({ workOrder, onClose }: WorkOrderDetailProps) {
-  const status = STATUS_LABELS[workOrder.status];
-  const priority = PRIORITY_LABELS[workOrder.priority];
-  const StatusIcon = status.icon;
+  const status = getStatusConfig(WORK_ORDER_STATUSES, workOrder.status);
+  const priority = WORK_ORDER_PRIORITIES[workOrder.priority] || { label: '中', color: '#faad14' };
+  const StatusIcon = workOrder.status === 'completed' ? CheckCircleIcon :
+                    workOrder.status === 'pending' ? ClockCircleIcon :
+                    AlertCircleIcon;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('zh-CN', {
@@ -133,7 +124,6 @@ export function WorkOrderDetail({ workOrder, onClose }: WorkOrderDetailProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <WrenchIcon size={16} color="#666" />
               <span>{workOrder.deviceName}</span>
-              <span style={{ color: '#999', fontSize: '13px' }}>({workOrder.buildingId})</span>
             </div>
           </div>
 

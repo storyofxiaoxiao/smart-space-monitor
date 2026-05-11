@@ -1,27 +1,21 @@
 import { CircleDotIcon } from '../icons';
+import { DEVICE_STATUSES } from '../constants';
 
 interface StatusFilterProps {
   selectedStatus: string;
   onSelect: (status: string) => void;
 }
 
-const STATUS_OPTIONS = [
-  { value: 'all', label: '全部' },
-  { value: 'normal', label: '正常' },
-  { value: 'warning', label: '告警' },
-  { value: 'fault', label: '故障' },
-  { value: 'offline', label: '离线' },
-];
-
-const STATUS_COLORS: Record<string, string> = {
-  all: '#999',
-  normal: '#52c41a',
-  warning: '#faad14',
-  fault: '#ff4d4f',
-  offline: '#d9d9d9',
-};
-
 export function StatusFilter({ selectedStatus, onSelect }: StatusFilterProps) {
+  const statusOptions = [
+    { value: 'all', label: '全部', color: '#999' },
+    ...Object.entries(DEVICE_STATUSES).map(([key, config]) => ({
+      value: key,
+      label: config.label,
+      color: config.color,
+    })),
+  ];
+
   return (
     <div style={{ padding: '16px', borderTop: '1px solid #f0f0f0' }}>
       <h3 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 500, color: '#333' }}>
@@ -29,7 +23,7 @@ export function StatusFilter({ selectedStatus, onSelect }: StatusFilterProps) {
         状态筛选
       </h3>
       <ul style={{ listStyle: 'none', padding: 0 }}>
-        {STATUS_OPTIONS.map((option) => (
+        {statusOptions.map((option) => (
           <li key={option.value}>
             <button
               onClick={() => onSelect(option.value)}
@@ -53,7 +47,7 @@ export function StatusFilter({ selectedStatus, onSelect }: StatusFilterProps) {
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  backgroundColor: STATUS_COLORS[option.value],
+                  backgroundColor: option.color,
                 }}
               />
               {option.label}
