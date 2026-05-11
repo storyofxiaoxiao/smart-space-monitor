@@ -2,11 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DeviceAlertPanel } from '../DeviceAlertPanel';
 
-vi.mock('react', () => ({
-  ...vi.importActual('react'),
-  useEffect: vi.fn(),
-}));
-
 describe('DeviceAlertPanel', () => {
   const mockAlerts = [
     {
@@ -30,7 +25,7 @@ describe('DeviceAlertPanel', () => {
   ];
 
   beforeEach(() => {
-    global.fetch = vi.fn();
+    globalThis.fetch = vi.fn() as typeof fetch;
   });
 
   afterEach(() => {
@@ -38,40 +33,41 @@ describe('DeviceAlertPanel', () => {
   });
 
   it('should display alerts correctly', async () => {
-    (global.fetch as vi.Mock).mockResolvedValueOnce({
+    (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: async () => mockAlerts,
     });
 
-    render(<DeviceAlertPanel buildingId="B1" />);
+    const { container } = render(<DeviceAlertPanel buildingId="B1" />);
 
     await waitFor(() => {
-      expect(screen.getByText('设备_001')).toBeInTheDocument();
-      expect(screen.getByText('设备_002')).toBeInTheDocument();
+      expect(container.textContent).toContain('设备_001');
+      expect(container.textContent).toContain('设备_002');
     });
   });
 
   it('should filter alerts by level', async () => {
-    (global.fetch as vi.Mock).mockResolvedValueOnce({
+    (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
       json: async () => mockAlerts,
     });
 
-    render(<DeviceAlertPanel buildingId="B1" />);
+    const { container } = render(<DeviceAlertPanel buildingId="B1" />);
 
     await waitFor(() => {
-      expect(screen.getByText('设备_001')).toBeInTheDocument();
+      expect(container.textContent).toContain('设备_001');
     });
 
-    const select = screen.getByRole('combobox');
-    fireEvent.change(select, { target: { value: 'critical' } });
+    const select = container.querySelector('select');
+    expect(select).toBeTruthy();
+    fireEvent.change(select!, { target: { value: 'critical' } });
 
     expect(screen.queryByText('设备_001')).not.toBeInTheDocument();
     expect(screen.getByText('设备_002')).toBeInTheDocument();
   });
 
   it('should acknowledge alert when button clicked', async () => {
-    (global.fetch as vi.Mock)
+    (globalThis.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockAlerts,
@@ -87,9 +83,8 @@ describe('DeviceAlertPanel', () => {
       expect(screen.getByText('确认')).toBeInTheDocument();
     });
 
-    const acknowledgeBtn = screen.getByText('确认');
-    fireEvent.click(acknowledgeBtn);
+    fireEvent.click(screen.getByText('确认'));
 
-    expect(global.fetch).toHaveBeenCalledWith('/api/alerts/alt_001/ack', { method: 'POST' });
+    expect(globalThis.fetch).toHaveBeenCalledWith('/api/alerts/alt_001/ack', { method: 'POST' });
   });
 });

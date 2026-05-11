@@ -1,5 +1,5 @@
 import React from 'react';
-import { DeviceStatus, DeviceType } from '../types';
+import type { DeviceStatus } from '../types';
 import { DEVICE_STATUSES } from '../constants';
 import { IconProps } from '../icons';
 
@@ -25,7 +25,6 @@ export const DeviceTypeCard: React.FC<DeviceTypeCardProps> = ({
         backgroundColor: '#fff',
         border: '1px solid #1890ff',
         position: 'relative',
-        marginTop: '8px',
       }}
     >
       <div
@@ -35,12 +34,11 @@ export const DeviceTypeCard: React.FC<DeviceTypeCardProps> = ({
           left: '16px',
           height: '24px',
           padding: '0 16px',
-          borderRadius: '6px',
+          borderRadius: '4px 4px 0 0',
           backgroundColor: '#1890ff',
           color: '#fff',
           fontSize: '12px',
           fontWeight: 500,
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
           zIndex: 1,
           display: 'flex',
           alignItems: 'center',
@@ -48,7 +46,7 @@ export const DeviceTypeCard: React.FC<DeviceTypeCardProps> = ({
       >
         {label}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', marginTop: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', }}>
         <div
           style={{
             width: '36px',

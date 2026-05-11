@@ -32,10 +32,10 @@ export function BuildingSelector({ selectedBuilding, onSelect }: BuildingSelecto
   }
 
   return (
-    <div style={{ padding: '16px' }}>
-      <h3 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 500, color: '#333' }}>
+    <div >
+      <h3 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 500, color: '#333', display: 'flex', alignItems: 'center' }}>
         <ApartmentIcon size={16} color="#666" style={{ marginRight: '8px' }} />
-        楼栋选择
+        楼栋
       </h3>
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {buildings.map((building) => (

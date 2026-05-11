@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MonitorIcon } from '../icons';
+import { MonitorIcon, ElevatorIcon, AirIcon, DropletsIcon, LightbulbIcon, ShieldIcon, CheckCircleIcon, AlertTriangleIcon, AlertCircleIcon, WifiOffIcon } from '../icons';
 import { DEVICE_STATUSES } from '../constants';
 import type { Device } from '../types';
 import { DeviceTypeCard } from './DeviceTypeCard';
@@ -151,7 +151,7 @@ export function DeviceStats({ devices }: DeviceStatsProps) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, calc((100% - 48px) / 5)), 1fr))', gap: '32px 12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '32px 12px' }}>
           {viewMode === 'type' ? (
             statsByType.map(({ icon: Icon, label, color, count, statusCounts }) => (
               <DeviceTypeCard

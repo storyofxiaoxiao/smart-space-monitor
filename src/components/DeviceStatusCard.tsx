@@ -1,5 +1,5 @@
 import React from 'react';
-import { DeviceType } from '../types';
+import type { DeviceType } from '../types';
 import { TYPE_CONFIG } from '../constants';
 import { IconProps } from '../icons';
 
@@ -52,7 +52,9 @@ export const DeviceStatusCard: React.FC<DeviceStatusCardProps> = ({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '8px' }}>
         {Object.entries(typeCounts).map(([type, typeCount]) => (
           <div key={type} style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '11px', color: '#999' }}>{TYPE_CONFIG[type]?.label}</div>
+            <div style={{ fontSize: '11px', color: '#999' }}>
+              {TYPE_CONFIG[type as DeviceType]?.label}
+            </div>
             <div style={{ fontSize: '14px', fontWeight: 500, color: '#333' }}>{typeCount}</div>
           </div>
         ))}

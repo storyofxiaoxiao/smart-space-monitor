@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { XIcon, AlertCircleIcon } from '../icons';
 import { workOrderApi, deviceApi } from '../api';
-import type { Device } from '../types';
+import type { Device, WorkOrderPriority } from '../types';
 
 interface CreateWorkOrderModalProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ interface CreateWorkOrderModalProps {
   onCreate: () => void;
 }
 
-const PRIORITY_OPTIONS = [
+const PRIORITY_OPTIONS: { value: WorkOrderPriority; label: string }[] = [
   { value: 'high', label: '高' },
   { value: 'medium', label: '中' },
   { value: 'low', label: '低' },
@@ -18,7 +18,7 @@ const PRIORITY_OPTIONS = [
 export function CreateWorkOrderModal({ isOpen, onClose, onCreate }: CreateWorkOrderModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('medium');
+  const [priority, setPriority] = useState<WorkOrderPriority>('medium');
   const [deviceId, setDeviceId] = useState('');
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,11 +33,11 @@ export function CreateWorkOrderModal({ isOpen, onClose, onCreate }: CreateWorkOr
     }
   };
 
-  useState(() => {
+  useEffect(() => {
     if (isOpen) {
-      fetchDevices();
+      void fetchDevices();
     }
-  });
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,7 +187,7 @@ export function CreateWorkOrderModal({ isOpen, onClose, onCreate }: CreateWorkOr
                     name="priority"
                     value={option.value}
                     checked={priority === option.value}
-                    onChange={(e) => setPriority(e.target.value)}
+                    onChange={(e) => setPriority(e.target.value as WorkOrderPriority)}
                     style={{ display: 'none' }}
                   />
                   {option.label}

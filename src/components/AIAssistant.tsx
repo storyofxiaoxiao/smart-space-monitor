@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { XIcon, BotIcon, SendIcon, LoaderIcon } from '../icons';
 import { chatApi, deviceApi, alertApi, workOrderApi } from '../api';
-import type { ChatMessage, Device, Alert, WorkOrder } from '../types';
+import type { ChatMessage, Device, Alert, WorkOrder, WorkOrderPriority } from '../types';
 
 interface AIAssistantProps {
   isOpen: boolean;
@@ -22,6 +22,35 @@ const TOOL_INFO: Record<string, { label: string; description: string }> = {
   query_alerts: { label: '查询告警', description: '正在查询告警记录...' },
   create_work_order: { label: '创建工单', description: '正在创建工单...' },
 };
+
+function formatChatApiError(err: unknown): string {
+  if (err instanceof TypeError && err.message.includes('fetch')) {
+    return '无法连接服务：请确认 Mock 服务已启动（如 http://localhost:3001），且前端开发代理正常。';
+  }
+  if (err instanceof Error) {
+    const m = err.message;
+    if (m && m.length < 200) {
+      return `对话服务异常：${m}。请稍后重试。`;
+    }
+  }
+  return '对话服务暂时不可用，请稍后重试。';
+}
+
+function formatToolFailure(label: string, err: unknown): string {
+  if (err instanceof SyntaxError) {
+    return '工具参数解析失败，请换种说法重试。';
+  }
+  if (err instanceof Error) {
+    if (err.message.startsWith('Unknown tool:')) {
+      return `当前不支持该工具：${err.message.replace('Unknown tool: ', '')}。`;
+    }
+    const m = err.message;
+    if (m && m.length < 200) {
+      return `「${label}」执行失败：${m}`;
+    }
+  }
+  return `「${label}」执行失败，请稍后重试。`;
+}
 
 export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -52,11 +81,14 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         return JSON.stringify(alerts);
       }
       case 'create_work_order': {
+        const rawPriority = (args.priority as string) || 'medium';
+        const priority: WorkOrderPriority =
+          rawPriority === 'high' || rawPriority === 'low' ? rawPriority : 'medium';
         const workOrder: WorkOrder = await workOrderApi.create({
           title: args.title as string,
           description: args.description as string,
           deviceId: args.deviceId as string,
-          priority: (args.priority as string) || 'medium',
+          priority,
         });
         return JSON.stringify(workOrder);
       }
@@ -90,8 +122,23 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
 
       let currentMessages = [...conversationHistory];
 
-      while (true) {
-        const response = await chatApi.sendMessage(currentMessages);
+      chatLoop: while (true) {
+        let response: Awaited<ReturnType<typeof chatApi.sendMessage>>;
+        try {
+          response = await chatApi.sendMessage(currentMessages);
+        } catch (chatErr) {
+          console.error('Chat API failed:', chatErr);
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `err-chat-${Date.now()}`,
+              content: formatChatApiError(chatErr),
+              role: 'assistant',
+              timestamp: new Date().toLocaleTimeString('zh-CN'),
+            },
+          ]);
+          break chatLoop;
+        }
 
         if (response.tool_calls && response.tool_calls.length > 0) {
           for (const toolCall of response.tool_calls) {
@@ -111,8 +158,39 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
               },
             ]);
 
-            const args = JSON.parse(toolCall.function.arguments || '{}');
-            const toolResult = await executeTool(toolCall.function.name, args);
+            let args: Record<string, unknown>;
+            try {
+              args = JSON.parse(toolCall.function.arguments || '{}') as Record<string, unknown>;
+            } catch (parseErr) {
+              console.error('Tool arguments JSON parse failed:', parseErr);
+              setMessages((prev) => [
+                ...prev.slice(0, -1),
+                {
+                  id: `err-parse-${Date.now()}`,
+                  content: formatToolFailure(toolInfo.label, parseErr),
+                  role: 'assistant',
+                  timestamp: new Date().toLocaleTimeString('zh-CN'),
+                },
+              ]);
+              break chatLoop;
+            }
+
+            let toolResult: string;
+            try {
+              toolResult = await executeTool(toolCall.function.name, args);
+            } catch (toolErr) {
+              console.error('Tool execution failed:', toolErr);
+              setMessages((prev) => [
+                ...prev.slice(0, -1),
+                {
+                  id: `err-tool-${Date.now()}`,
+                  content: formatToolFailure(toolInfo.label, toolErr),
+                  role: 'assistant',
+                  timestamp: new Date().toLocaleTimeString('zh-CN'),
+                },
+              ]);
+              break chatLoop;
+            }
 
             const assistantMessage: ChatMessage = {
               role: 'assistant',
@@ -145,14 +223,14 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
             timestamp: new Date().toLocaleTimeString('zh-CN'),
           };
           setMessages((prev) => [...prev, assistantMessage]);
-          break;
+          break chatLoop;
         }
       }
     } catch (error) {
       console.error('AI request failed:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: '抱歉，服务暂时不可用，请稍后再试。',
+        content: formatChatApiError(error),
         role: 'assistant',
         timestamp: new Date().toLocaleTimeString('zh-CN'),
       };

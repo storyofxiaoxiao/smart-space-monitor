@@ -21,6 +21,8 @@ export const DEVICE_TYPES = {
   fire_pressure: { label: '消防', color: '#ff4d4f' },
 } as const satisfies Record<DeviceType, { label: string; color: string }>;
 
+export const TYPE_CONFIG = DEVICE_TYPES;
+
 export const WORK_ORDER_STATUSES = {
   pending: { label: '待处理', color: '#faad14', bgColor: '#fffbe6' },
   assigned: { label: '已派单', color: '#722ed1', bgColor: '#f9f0ff' },

@@ -39,8 +39,12 @@ export const deviceApi = {
     status?: string;
     type?: string;
   }): Promise<Device[]> => {
-    const query = new URLSearchParams(params).toString();
-    return fetchJson(`${BASE_URL}/devices?${query}`);
+    const search = new URLSearchParams();
+    if (params?.buildingId) search.set('buildingId', params.buildingId);
+    if (params?.status) search.set('status', params.status);
+    if (params?.type) search.set('type', params.type);
+    const qs = search.toString();
+    return fetchJson(`${BASE_URL}/devices${qs ? `?${qs}` : ''}`);
   },
   getById: async (id: string): Promise<Device> => {
     return fetchJson(`${BASE_URL}/devices/${id}`);
@@ -53,8 +57,14 @@ export const alertApi = {
     level?: string;
     acknowledged?: boolean;
   }): Promise<Alert[]> => {
-    const query = new URLSearchParams(params).toString();
-    return fetchJson(`${BASE_URL}/alerts?${query}`);
+    const search = new URLSearchParams();
+    if (params?.buildingId) search.set('buildingId', params.buildingId);
+    if (params?.level) search.set('level', params.level);
+    if (params?.acknowledged !== undefined) {
+      search.set('acknowledged', String(params.acknowledged));
+    }
+    const qs = search.toString();
+    return fetchJson(`${BASE_URL}/alerts${qs ? `?${qs}` : ''}`);
   },
   acknowledge: async (id: string): Promise<{ id: string; acknowledged: boolean }> => {
     return fetchJson(`${BASE_URL}/alerts/${id}/ack`, { method: 'POST' });
@@ -63,8 +73,10 @@ export const alertApi = {
 
 export const workOrderApi = {
   getAll: async (params?: { status?: string }): Promise<WorkOrder[]> => {
-    const query = new URLSearchParams(params).toString();
-    return fetchJson(`${BASE_URL}/work-orders?${query}`);
+    const search = new URLSearchParams();
+    if (params?.status) search.set('status', params.status);
+    const qs = search.toString();
+    return fetchJson(`${BASE_URL}/work-orders${qs ? `?${qs}` : ''}`);
   },
   create: async (data: CreateWorkOrderRequest): Promise<WorkOrder> => {
     return fetchJson(`${BASE_URL}/work-orders`, {

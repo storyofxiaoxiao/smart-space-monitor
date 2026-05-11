@@ -1,12 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { WorkOrderList } from '../WorkOrderList';
+import { workOrderApi } from '../../api';
 
-vi.mock('../../api', () => ({
-  workOrderApi: {
-    getAll: vi.fn(),
-  },
-}));
+vi.mock('../../api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../api')>();
+  return {
+    ...actual,
+    workOrderApi: {
+      ...actual.workOrderApi,
+      getAll: vi.fn(),
+    },
+  };
+});
 
 describe('WorkOrderList', () => {
   const mockWorkOrders = [
@@ -24,7 +30,7 @@ describe('WorkOrderList', () => {
   ];
 
   beforeEach(() => {
-    vi.mocked(require('../../api').workOrderApi.getAll).mockResolvedValue(mockWorkOrders);
+    vi.mocked(workOrderApi.getAll).mockResolvedValue(mockWorkOrders);
   });
 
   afterEach(() => {
@@ -35,25 +41,27 @@ describe('WorkOrderList', () => {
     render(<WorkOrderList />);
 
     await waitFor(() => {
-      expect(screen.getByText('WO-001')).toBeInTheDocument();
       expect(screen.getByText('测试工单')).toBeInTheDocument();
+      expect(screen.getByText('设备_001')).toBeInTheDocument();
     });
+    expect(workOrderApi.getAll).toHaveBeenCalled();
   });
 
   it('should show create button', () => {
     render(<WorkOrderList />);
 
-    expect(screen.getByText('创建工单')).toBeInTheDocument();
+    const buttons = screen.getAllByRole('button', { name: /创建工单/i });
+    expect(buttons.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('should filter by status', async () => {
-    vi.mocked(require('../../api').workOrderApi.getAll).mockResolvedValue([]);
+  it('should show empty state when API returns no work orders', async () => {
+    vi.mocked(workOrderApi.getAll).mockResolvedValue([]);
 
     render(<WorkOrderList />);
 
     await waitFor(() => {
-      const select = screen.getByRole('combobox');
-      expect(select).toBeInTheDocument();
+      expect(screen.getByText('暂无工单')).toBeInTheDocument();
     });
+    expect(workOrderApi.getAll).toHaveBeenCalled();
   });
 });
