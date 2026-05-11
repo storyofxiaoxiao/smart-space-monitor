@@ -1,13 +1,21 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronDownIcon } from '../icons';
-import { DEVICE_STATUSES } from '../constants';
 
-interface StatusFilterProps {
-  selectedStatus: string;
-  onSelect: (status: string) => void;
+interface FilterOption {
+  value: string;
+  label: string;
+  color: string;
 }
 
-export function StatusFilter({ selectedStatus, onSelect }: StatusFilterProps) {
+interface FilterDropdownProps {
+  label: string;
+  options: FilterOption[];
+  value: string;
+  onChange: (value: string) => void;
+  minWidth?: number;
+}
+
+export function FilterDropdown({ label, options, value, onChange, minWidth = 100 }: FilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -21,16 +29,7 @@ export function StatusFilter({ selectedStatus, onSelect }: StatusFilterProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const statusOptions = [
-    { value: 'all', label: '全部', color: '#999' },
-    ...Object.entries(DEVICE_STATUSES).map(([key, config]) => ({
-      value: key,
-      label: config.label,
-      color: config.color,
-    })),
-  ];
-
-  const selectedOption = statusOptions.find((opt) => opt.value === selectedStatus) || statusOptions[0];
+  const selectedOption = options.find((opt) => opt.value === value) || options[0];
 
   return (
     <div ref={dropdownRef} style={{ display: 'inline-block', position: 'relative' }}>
@@ -39,18 +38,17 @@ export function StatusFilter({ selectedStatus, onSelect }: StatusFilterProps) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          padding: '6px 12px',
-          borderRadius: '6px',
+          gap: '6px',
+          padding: '8px 12px',
+          borderRadius: '4px',
           border: '1px solid #d9d9d9',
           backgroundColor: '#fff',
           cursor: 'pointer',
           fontSize: '14px',
-          color: '#333',
-          minWidth: '100px',
+          minWidth,
         }}
       >
-        <span style={{ color: '#666', fontSize: '13px' }}>状态:</span>
+        <span style={{ color: '#666', fontSize: '13px' }}>{label}:</span>
         <span
           style={{
             width: '8px',
@@ -72,22 +70,22 @@ export function StatusFilter({ selectedStatus, onSelect }: StatusFilterProps) {
           style={{
             position: 'absolute',
             top: '100%',
-            left: 0,
+            right: 0,
             marginTop: '4px',
             padding: '4px',
             backgroundColor: '#fff',
-            borderRadius: '6px',
+            borderRadius: '4px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             border: '1px solid #f0f0f0',
             zIndex: 100,
-            minWidth: '120px',
+            minWidth,
           }}
         >
-          {statusOptions.map((option) => (
+          {options.map((option) => (
             <button
               key={option.value}
               onClick={() => {
-                onSelect(option.value);
+                onChange(option.value);
                 setIsOpen(false);
               }}
               style={{
@@ -97,7 +95,7 @@ export function StatusFilter({ selectedStatus, onSelect }: StatusFilterProps) {
                 borderRadius: '4px',
                 border: 'none',
                 cursor: 'pointer',
-                backgroundColor: selectedStatus === option.value ? '#f0f5ff' : 'transparent',
+                backgroundColor: value === option.value ? '#f0f5ff' : 'transparent',
                 color: '#333',
                 fontSize: '14px',
                 display: 'flex',

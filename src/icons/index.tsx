@@ -120,6 +120,14 @@ export function ChevronRightIcon({ size = 20, color = '#666', ...props }: IconPr
   );
 }
 
+export function ChevronDownIcon({ size = 20, color = '#666', ...props }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
 export function PlusIcon({ size = 20, color = '#666', ...props }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -208,11 +216,41 @@ export function ShieldIcon({ size = 20, color = '#666', ...props }: IconProps) {
   );
 }
 
+export function WifiOffIcon({ size = 20, color = '#666', ...props }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <line x1="1" y1="1" x2="23" y2="23" />
+      <path d="M16.5 10.5a4.5 4.5 0 0 0-9 0 4.97 4.97 0 0 0-2 8.29" />
+      <path d="M9.5 14.5a4.5 4.5 0 0 0 9 0 4.97 4.97 0 0 1 2-8.29" />
+      <path d="M12 19.93a8 8 0 0 1-7-8 8.5 8.5 0 0 1 15 0 8 8 0 0 1-7 8" />
+    </svg>
+  );
+}
+
+export function SwapHorizontalIcon({ size = 20, color = '#666', ...props }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <polyline points="16 3 21 3 21 8" />
+      <polyline points="8 21 3 21 3 16" />
+      <line x1="21" y1="3" x2="14" y2="10" />
+      <line x1="3" y1="16" x2="10" y2="9" />
+    </svg>
+  );
+}
+
 export function CircleDotIcon({ size = 20, color = '#666', ...props }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <circle cx="12" cy="12" r="10" />
       <circle cx="12" cy="12" r="4" />
+    </svg>
+  );
+}
+
+export function LoaderIcon({ size = 20, color = '#666', ...props }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="12" cy="12" r="10" />
     </svg>
   );
 }

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Layout, Menu } from 'antd';
 import { BotIcon, MonitorIcon, FileTextIcon, ApartmentIcon } from './icons';
 import { BuildingSelector } from './components/BuildingSelector';
-import { StatusFilter } from './components/StatusFilter';
 import { DeviceStats } from './components/DeviceStats';
 import { DeviceList } from './components/DeviceList';
 import { WorkOrderList } from './components/WorkOrderList';
@@ -20,7 +19,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<TabType>('devices');
   const [devices, setDevices] = useState<Device[]>([]);
   const [devicesLoading, setDevicesLoading] = useState(true);
-  const [showAssistant, setShowAssistant] = useState(false);
+  const [showAssistant, setShowAssistant] = useState(true);
 
   const loadDevices = async () => {
     setDevicesLoading(true);
@@ -82,12 +81,12 @@ function App() {
           ]}
         />
         <button
-          onClick={() => setShowAssistant(true)}
+          onClick={() => setShowAssistant(!showAssistant)}
           style={{
             padding: '8px 16px',
             borderRadius: '4px',
-            border: 'none',
-            backgroundColor: '#1890ff',
+            border: showAssistant ? '1px solid #1890ff' : 'none',
+            backgroundColor: showAssistant ? 'rgba(24, 144, 255, 0.1)' : '#1890ff',
             color: '#fff',
             cursor: 'pointer',
             display: 'flex',
@@ -96,27 +95,43 @@ function App() {
           }}
         >
           <BotIcon size={16} />
-          AI 助手
+          {showAssistant ? '关闭 AI' : 'AI 助手'}
         </button>
       </Header>
 
       <Layout>
-        <Sider width={200} style={{ backgroundColor: '#fff', borderRight: '1px solid #f0f0f0' }}>
+        <Sider width={180} style={{ backgroundColor: '#fff', borderRight: '1px solid #f0f0f0' }}>
           <BuildingSelector selectedBuilding={selectedBuilding} onSelect={handleBuildingChange} />
-          <StatusFilter selectedStatus={statusFilter} onSelect={handleStatusChange} />
         </Sider>
 
         <Content style={{ padding: '24px', backgroundColor: '#f5f5f5' }}>
           {activeTab === 'devices' && (
             <>
               <DeviceStats devices={devices} />
-              <DeviceList buildingId={selectedBuilding} statusFilter={statusFilter} />
+              <DeviceList 
+                buildingId={selectedBuilding} 
+                statusFilter={statusFilter} 
+                onStatusChange={handleStatusChange} 
+              />
             </>
           )}
           {activeTab === 'workOrders' && <WorkOrderList />}
         </Content>
 
-        {showAssistant && <AIAssistant isOpen={showAssistant} onClose={() => setShowAssistant(false)} />}
+        {showAssistant && (
+          <Sider
+            width={380}
+            style={{
+              backgroundColor: '#fff',
+              borderLeft: '1px solid #f0f0f0',
+              overflow: 'auto',
+              height: 'calc(100vh - 64px)',
+              position: 'relative',
+            }}
+          >
+            <AIAssistant isOpen={showAssistant} onClose={() => setShowAssistant(false)} />
+          </Sider>
+        )}
       </Layout>
     </Layout>
   );

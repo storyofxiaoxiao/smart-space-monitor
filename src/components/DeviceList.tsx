@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { SearchIcon, FilterIcon, ChevronRightIcon } from '../icons';
+import { SearchIcon, ChevronRightIcon } from '../icons';
 import { DEVICE_STATUSES, DEVICE_TYPES } from '../constants';
 import { deviceApi } from '../api';
 import type { Device } from '../types';
 import { DeviceDetail } from './DeviceDetail';
+import { FilterDropdown } from './FilterDropdown';
 
 interface DeviceListProps {
   buildingId: string;
   statusFilter: string;
+  onStatusChange: (status: string) => void;
 }
 
-export function DeviceList({ buildingId, statusFilter }: DeviceListProps) {
+export function DeviceList({ buildingId, statusFilter, onStatusChange }: DeviceListProps) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
@@ -46,10 +48,28 @@ export function DeviceList({ buildingId, statusFilter }: DeviceListProps) {
     return `${floor}F`;
   };
 
+  const statusOptions = [
+    { value: 'all', label: '全部', color: '#999' },
+    ...Object.entries(DEVICE_STATUSES).map(([key, config]) => ({
+      value: key,
+      label: config.label,
+      color: config.color,
+    })),
+  ];
+
+  const typeOptions = [
+    { value: 'all', label: '全部', color: '#999' },
+    ...Object.entries(DEVICE_TYPES).map(([key, config]) => ({
+      value: key,
+      label: config.label,
+      color: config.color,
+    })),
+  ];
+
   return (
     <div>
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '16px', alignItems: 'center' }}>
-        <div style={{ flex: 1, position: 'relative' }}>
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ position: 'relative', width: '280px' }}>
           <SearchIcon size={16} color="#999" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
@@ -65,26 +85,22 @@ export function DeviceList({ buildingId, statusFilter }: DeviceListProps) {
             }}
           />
         </div>
-        <div style={{ position: 'relative' }}>
-          <FilterIcon size={16} color="#999" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-          <select
+
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <FilterDropdown
+            label="状态"
+            options={statusOptions}
+            value={statusFilter}
+            onChange={onStatusChange}
+            minWidth={100}
+          />
+          <FilterDropdown
+            label="类型"
+            options={typeOptions}
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            style={{
-              padding: '8px 32px 8px 40px',
-              borderRadius: '4px',
-              border: '1px solid #d9d9d9',
-              fontSize: '14px',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="all">全部类型</option>
-            {Object.entries(DEVICE_TYPES).map(([key, config]) => (
-              <option key={key} value={key}>
-                {config.label}
-              </option>
-            ))}
-          </select>
+            onChange={setTypeFilter}
+            minWidth={110}
+          />
         </div>
       </div>
 
