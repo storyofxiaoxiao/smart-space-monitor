@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Layout, Menu } from 'antd';
-import { BotIcon, MonitorIcon, FileTextIcon, ApartmentIcon } from './icons';
+import { MonitorIcon, FileTextIcon, ApartmentIcon } from './icons';
+import aiAssistantIconUrl from './assets/icons/ai-chat-icon.svg';
 import { BuildingSelector } from './components/BuildingSelector';
 import { DeviceStats } from './components/DeviceStats';
 import { DeviceList } from './components/DeviceList';
@@ -91,17 +92,32 @@ function App() {
             style={{
               padding: '8px 16px',
               borderRadius: '6px',
-              border: showAssistant ? '1px solid #1890ff' : 'none',
-              backgroundColor: showAssistant ? 'rgba(24, 144, 255, 0.1)' : '#1890ff',
-              color: showAssistant ? '#1890ff' : '#fff',
+              border: showAssistant ? '1px solid #141414' : 'none',
+              backgroundColor: '#141414',
+              color:  '#ffffff',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
             }}
           >
-            <BotIcon size={16} />
-            {showAssistant ? '关闭 AI' : 'AI 助手'}
+            <span
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src={aiAssistantIconUrl}
+                alt=""
+                width={16}
+                height={16}
+                style={{ display: 'block' }}
+              />
+            </span>
+            {showAssistant ? '收起 AI' : 'AI 助手'}
           </button>
         </div>
 

@@ -52,7 +52,7 @@ export function ApartmentIcon({ size = 20, color = '#666', ...props }: IconProps
   );
 }
 
-export function SendIcon({ size = 20, color = '#666', ...props }: IconProps) {
+export function SendIcon({ size = 20, color = '#ffffff', ...props }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <line x1="22" y1="2" x2="11" y2="13" />

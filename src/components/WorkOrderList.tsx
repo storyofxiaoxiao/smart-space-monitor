@@ -68,7 +68,7 @@ export function WorkOrderList() {
             gap: '8px',
           }}
         >
-          <PlusIcon size={16} />
+          <PlusIcon size={16} color='#ffffff'/>
           创建工单
         </button>
       </div>

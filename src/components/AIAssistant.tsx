@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { XIcon, BotIcon, SendIcon, LoaderIcon } from '../icons';
+import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } from 'react';
+import { XIcon, SendIcon, LoaderIcon } from '../icons';
+import aiAssistantIconUrl from '../assets/icons/ai-chat-icon.svg';
 import { chatApi, deviceApi, alertApi, workOrderApi } from '../api';
 import type { ChatMessage, Device, Alert, WorkOrder, WorkOrderPriority } from '../types';
 
@@ -16,6 +17,15 @@ interface Message {
   toolCallId?: string;
   isProcessing?: boolean;
 }
+
+const AI_ICON_PANEL: CSSProperties = {
+  backgroundColor: '#141414',
+  borderRadius: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+};
 
 const TOOL_INFO: Record<string, { label: string; description: string }> = {
   query_devices: { label: '查询设备', description: '正在查询设备信息...' },
@@ -240,7 +250,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -268,18 +278,8 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              backgroundColor: '#667eea',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <BotIcon size={20} color="#fff" />
+          <div style={{ ...AI_ICON_PANEL, width: 36, height: 36 }}>
+            <img src={aiAssistantIconUrl} alt="" width={22} height={22} style={{ display: 'block' }} />
           </div>
           <div>
             <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#333' }}>AI 工单助手</h2>
@@ -323,17 +323,13 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           <div style={{ textAlign: 'center', padding: '40px 20px', color: '#999' }}>
             <div
               style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                backgroundColor: '#667eea',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                ...AI_ICON_PANEL,
+                width: 64,
+                height: 64,
                 margin: '0 auto 16px',
               }}
             >
-              <BotIcon size={32} color="#fff" />
+              <img src={aiAssistantIconUrl} alt="" width={40} height={40} style={{ display: 'block' }} />
             </div>
             <p style={{ fontSize: '14px', marginBottom: '8px' }}>您好！我是智能工单助手</p>
             <p style={{ fontSize: '13px', lineHeight: '1.6' }}>
@@ -364,7 +360,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                         width: '28px',
                         height: '28px',
                         borderRadius: '50%',
-                        backgroundColor: message.role === 'tool' ? '#52c41a' : '#667eea',
+                        backgroundColor: message.role === 'tool' ? '#52c41a' : '#141414',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -375,7 +371,7 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                       {message.role === 'tool' ? (
                         <span style={{ color: '#fff', fontSize: '10px', fontWeight: 600 }}>T</span>
                       ) : (
-                        <BotIcon size={14} color="#fff" />
+                        <img src={aiAssistantIconUrl} alt="" width={16} height={16} style={{ display: 'block' }} />
                       )}
                     </div>
                   )}

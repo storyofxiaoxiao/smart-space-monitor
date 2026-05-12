@@ -196,6 +196,13 @@ app.post('/api/chat', (req, res) => {
     // 如果最后一条是 user 消息 → 分析意图
     if (lastMsg.role === 'user') {
       const text = lastMsg.content || '';
+
+      // 用户简短肯定（如「需要」）承接上一条助手是否创建工单 / 处理告警的追问
+      const followUp = followUpAfterAssistantOffer(messages, text);
+      if (followUp) {
+        return res.json({ role: 'assistant', content: followUp });
+      }
+
       const intent = detectIntent(text);
 
       if (intent) {
@@ -233,6 +240,36 @@ function safeParseJSON(str) {
   } catch {
     return str;
   }
+}
+
+/**
+ * 从当前 user 消息往前找最近一条带正文的 assistant，判断是否刚问过「要不要创建工单」等。
+ */
+function followUpAfterAssistantOffer(messages, text) {
+  const trimmed = (text || '').trim();
+  if (!/^(需要|好的|是的|可以|要|嗯|行|好|ok|yes)$/i.test(trimmed)) {
+    return null;
+  }
+  if (messages.length < 2) return null;
+
+  for (let i = messages.length - 2; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role !== 'assistant' || m.content == null || typeof m.content !== 'string') {
+      continue;
+    }
+    const c = m.content;
+    if (/需要我帮你创建维修工单|创建维修工单吗/.test(c)) {
+      return (
+        '好的。请告诉我要为哪一台设备创建维修工单，可直接说明设备名称或 ID，例如：' +
+        '「给空调_008创建一个工单，描述压缩机故障」。'
+      );
+    }
+    if (/需要对某条告警/.test(c)) {
+      return '好的。请说明要跟进哪一条告警，或描述希望创建的工单内容。';
+    }
+    break;
+  }
+  return null;
 }
 
 function detectIntent(text) {
