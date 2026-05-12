@@ -6,9 +6,11 @@ import type { Building } from '../types';
 interface BuildingSelectorProps {
   selectedBuilding: string;
   onSelect: (buildingId: string) => void;
+  /** 为 false 时不渲染「楼栋」标题（由外层布局提供标题与滚动区） */
+  showHeading?: boolean;
 }
 
-export function BuildingSelector({ selectedBuilding, onSelect }: BuildingSelectorProps) {
+export function BuildingSelector({ selectedBuilding, onSelect, showHeading = true }: BuildingSelectorProps) {
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,12 +34,24 @@ export function BuildingSelector({ selectedBuilding, onSelect }: BuildingSelecto
   }
 
   return (
-    <div >
-      <h3 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 500, color: '#333', display: 'flex', alignItems: 'center' }}>
-        <ApartmentIcon size={16} color="#666" style={{ marginRight: '8px' }} />
-        楼栋
-      </h3>
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+    <div>
+      {showHeading && (
+        <h3
+          style={{
+            marginBottom: '12px',
+            marginTop: 0,
+            fontSize: '14px',
+            fontWeight: 500,
+            color: '#333',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <ApartmentIcon size={16} color="#666" style={{ marginRight: '8px' }} />
+          楼栋
+        </h3>
+      )}
+      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         {buildings.map((building) => (
           <li key={building.id}>
             <button

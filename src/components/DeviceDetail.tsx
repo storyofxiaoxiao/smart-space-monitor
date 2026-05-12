@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { XIcon, AlertTriangleIcon, ClockCircleIcon, WrenchIcon } from '../icons';
+import { XIcon, AlertTriangleIcon, ClockCircleIcon } from '../icons';
 import { DEVICE_STATUSES, ALERT_LEVELS, getStatusConfig } from '../constants';
 import { deviceApi } from '../api';
 import type { Device } from '../types';
@@ -65,7 +65,8 @@ export function DeviceDetail({ device, onClose, onCreateWorkOrder }: DeviceDetai
     >
       <div
         style={{
-          width: '480px',
+          width: '560px',
+          maxWidth: '96vw',
           backgroundColor: '#fff',
           borderRadius: '8px',
           boxShadow: '0 4px 24px rgba(0, 0, 0, 0.15)',
@@ -146,45 +147,119 @@ export function DeviceDetail({ device, onClose, onCreateWorkOrder }: DeviceDetai
                 <AlertTriangleIcon size={16} color="#faad14" style={{ marginRight: '8px' }} />
                 最近告警
               </h3>
-              {deviceWithAlerts?.alerts && deviceWithAlerts.alerts.length > 0 ? (
-                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                  {deviceWithAlerts.alerts.map((alert) => {
-                    const level = ALERT_LEVELS[alert.level] || { label: alert.level, color: '#999' };
-                    return (
-                      <div
-                        key={alert.id}
+              <div style={{ overflowX: 'auto', maxHeight: '240px', overflowY: 'auto', border: '1px solid #f0f0f0', borderRadius: '6px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#fafafa' }}>
+                      <th
                         style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '8px 12px',
-                          marginBottom: '4px',
-                          backgroundColor: `${level.color}10`,
-                          borderRadius: '4px',
+                          padding: '8px 10px',
+                          textAlign: 'left',
+                          borderBottom: '1px solid #e8e8e8',
+                          fontWeight: 500,
+                          color: '#666',
+                          fontSize: '12px',
+                          whiteSpace: 'nowrap',
+                          width: 72,
                         }}
                       >
-                        <div>
-                          <span
-                            style={{
-                              fontSize: '12px',
-                              color: level.color,
-                              marginRight: '8px',
-                            }}
-                          >
-                            {level.label}
-                          </span>
-                          <span style={{ fontSize: '13px' }}>{alert.message}</span>
-                        </div>
-                        <span style={{ fontSize: '12px', color: '#999' }}>
-                          {new Date(alert.timestamp).toLocaleTimeString('zh-CN')}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>暂无告警记录</div>
-              )}
+                        级别
+                      </th>
+                      <th
+                        style={{
+                          padding: '8px 10px',
+                          textAlign: 'left',
+                          borderBottom: '1px solid #e8e8e8',
+                          fontWeight: 500,
+                          color: '#666',
+                          fontSize: '12px',
+                        }}
+                      >
+                        告警内容
+                      </th>
+                      <th
+                        style={{
+                          padding: '8px 10px',
+                          textAlign: 'left',
+                          borderBottom: '1px solid #e8e8e8',
+                          fontWeight: 500,
+                          color: '#666',
+                          fontSize: '12px',
+                          whiteSpace: 'nowrap',
+                          width: 130,
+                        }}
+                      >
+                        时间
+                      </th>
+                      <th
+                        style={{
+                          padding: '8px 10px',
+                          textAlign: 'left',
+                          borderBottom: '1px solid #e8e8e8',
+                          fontWeight: 500,
+                          color: '#666',
+                          fontSize: '12px',
+                          whiteSpace: 'nowrap',
+                          width: 72,
+                        }}
+                      >
+                        确认
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {deviceWithAlerts?.alerts && deviceWithAlerts.alerts.length > 0 ? (
+                      [...deviceWithAlerts.alerts]
+                        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                        .map((alert) => {
+                          const level = ALERT_LEVELS[alert.level] || { label: alert.level, color: '#999' };
+                          return (
+                            <tr key={alert.id} style={{ borderBottom: '1px solid #f0f0f0', backgroundColor: '#fff' }}>
+                              <td style={{ padding: '10px', verticalAlign: 'top' }}>
+                                <span
+                                  style={{
+                                    display: 'inline-block',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    color: level.color,
+                                    backgroundColor: `${level.color}18`,
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  {level.label}
+                                </span>
+                              </td>
+                              <td
+                                style={{
+                                  padding: '10px',
+                                  verticalAlign: 'top',
+                                  color: '#333',
+                                  lineHeight: 1.45,
+                                  wordBreak: 'break-word',
+                                }}
+                              >
+                                {alert.message}
+                              </td>
+                              <td style={{ padding: '10px', verticalAlign: 'top', color: '#666', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                                {formatTime(alert.timestamp)}
+                              </td>
+                              <td style={{ padding: '10px', verticalAlign: 'top', fontSize: '12px', color: alert.acknowledged ? '#52c41a' : '#d46b08' }}>
+                                {alert.acknowledged ? '已确认' : '待确认'}
+                              </td>
+                            </tr>
+                          );
+                        })
+                    ) : (
+                      <tr>
+                        <td colSpan={4} style={{ padding: '24px 16px', textAlign: 'center', color: '#999', borderBottom: 'none' }}>
+                          暂无告警记录
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
@@ -205,7 +280,6 @@ export function DeviceDetail({ device, onClose, onCreateWorkOrder }: DeviceDetai
                   gap: '8px',
                 }}
               >
-                <WrenchIcon size={14} />
                 创建工单
               </button>
             </div>

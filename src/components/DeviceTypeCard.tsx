@@ -9,13 +9,29 @@ interface DeviceTypeCardProps {
   color: string;
   count: number;
   statusCounts: Record<DeviceStatus, number>;
+  onMainCountClick: () => void;
+  onStatusCountClick: (status: DeviceStatus) => void;
 }
+
+const countBtnStyle: React.CSSProperties = {
+  cursor: 'pointer',
+  border: 'none',
+  background: 'transparent',
+  padding: '2px 6px',
+  margin: '-2px -6px',
+  borderRadius: '6px',
+  font: 'inherit',
+  textAlign: 'left' as const,
+  transition: 'background-color 0.15s ease',
+};
 
 export const DeviceTypeCard: React.FC<DeviceTypeCardProps> = ({
   icon: Icon,
   label,
   count,
   statusCounts,
+  onMainCountClick,
+  onStatusCountClick,
 }) => {
   return (
     <div
@@ -46,7 +62,7 @@ export const DeviceTypeCard: React.FC<DeviceTypeCardProps> = ({
       >
         {label}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
         <div
           style={{
             width: '36px',
@@ -61,7 +77,20 @@ export const DeviceTypeCard: React.FC<DeviceTypeCardProps> = ({
           <Icon size={18} color="#1890ff" />
         </div>
         <div>
-          <div style={{ fontSize: '20px', fontWeight: 600, color: '#333' }}>{count}</div>
+          <button
+            type="button"
+            title="按该类型筛选设备列表"
+            onClick={onMainCountClick}
+            style={{ ...countBtnStyle, display: 'block' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(24, 144, 255, 0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <span style={{ fontSize: '20px', fontWeight: 600, color: '#333' }}>{count}</span>
+          </button>
           <div style={{ fontSize: '12px', color: '#999' }}>设备总数</div>
         </div>
       </div>
@@ -72,7 +101,20 @@ export const DeviceTypeCard: React.FC<DeviceTypeCardProps> = ({
             <div style={{ fontSize: '11px', color: '#999' }}>
               {DEVICE_STATUSES[status as keyof typeof DEVICE_STATUSES]?.label}
             </div>
-            <div style={{ fontSize: '14px', fontWeight: 500, color: '#333' }}>{statusCount}</div>
+            <button
+              type="button"
+              title="按类型+状态筛选"
+              onClick={() => onStatusCountClick(status as DeviceStatus)}
+              style={{ ...countBtnStyle, fontSize: '14px', fontWeight: 500, color: '#333' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(24, 144, 255, 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              {statusCount}
+            </button>
           </div>
         ))}
       </div>

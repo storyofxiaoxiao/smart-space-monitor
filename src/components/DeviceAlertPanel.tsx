@@ -125,58 +125,84 @@ export const DeviceAlertPanel: React.FC<DeviceAlertPanelProps> = ({
         </div>
       </div>
 
-      {loading && <div style={{ textAlign: 'center', padding: 20, color: '#999' }}>加载中...</div>}
-
-      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {filteredAlerts.map((alert) => (
-          <li
-            key={alert.id}
-            onClick={() => onAlertClick?.(alert)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '8px 12px',
-              marginBottom: 4,
-              borderRadius: 4,
-              cursor: 'pointer',
-              backgroundColor: alert.acknowledged ? '#fafafa' : '#fff',
-              borderLeft: `3px solid ${LEVEL_COLORS[alert.level]}`,
-              opacity: alert.acknowledged ? 0.6 : 1,
-            }}
-          >
-            <span style={{ fontWeight: 500, minWidth: 100 }}>{alert.deviceName}</span>
-            <span style={{ flex: 1, color: '#666' }}>{alert.message}</span>
-            <span style={{ fontSize: 12, color: '#999', minWidth: 80 }}>
-              {new Date(alert.timestamp).toLocaleTimeString()}
-            </span>
-            {!alert.acknowledged && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAcknowledge(alert.id);
-                }}
-                style={{
-                  padding: '2px 8px',
-                  fontSize: 12,
-                  border: '1px solid #d9d9d9',
-                  borderRadius: 4,
-                  background: '#fff',
-                  cursor: 'pointer',
-                }}
-              >
-                确认
-              </button>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+          <thead>
+            <tr style={{ backgroundColor: '#fafafa' }}>
+              <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', color: '#666', fontWeight: 500 }}>
+                设备名称
+              </th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', color: '#666', fontWeight: 500 }}>
+                告警内容
+              </th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', color: '#666', fontWeight: 500 }}>
+                时间
+              </th>
+              <th style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', color: '#666', fontWeight: 500 }}>
+                操作
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={4} style={{ padding: 32, textAlign: 'center', color: '#999', borderBottom: '1px solid #f0f0f0' }}>
+                  加载中...
+                </td>
+              </tr>
+            ) : filteredAlerts.length === 0 ? (
+              <tr>
+                <td colSpan={4} style={{ padding: 32, textAlign: 'center', color: '#999', borderBottom: '1px solid #f0f0f0' }}>
+                  暂无告警
+                </td>
+              </tr>
+            ) : (
+              filteredAlerts.map((alert) => (
+                <tr
+                  key={alert.id}
+                  onClick={() => onAlertClick?.(alert)}
+                  style={{
+                    borderBottom: '1px solid #f0f0f0',
+                    cursor: 'pointer',
+                    backgroundColor: alert.acknowledged ? '#fafafa' : '#fff',
+                    opacity: alert.acknowledged ? 0.75 : 1,
+                    boxShadow: `inset 3px 0 0 0 ${LEVEL_COLORS[alert.level]}`,
+                  }}
+                >
+                  <td style={{ padding: '10px 12px', fontWeight: 500 }}>{alert.deviceName}</td>
+                  <td style={{ padding: '10px 12px', color: '#666' }}>{alert.message}</td>
+                  <td style={{ padding: '10px 12px', fontSize: 12, color: '#999', whiteSpace: 'nowrap' }}>
+                    {new Date(alert.timestamp).toLocaleTimeString()}
+                  </td>
+                  <td style={{ padding: '10px 12px' }}>
+                    {!alert.acknowledged ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAcknowledge(alert.id);
+                        }}
+                        style={{
+                          padding: '2px 8px',
+                          fontSize: 12,
+                          border: '1px solid #d9d9d9',
+                          borderRadius: 4,
+                          background: '#fff',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        确认
+                      </button>
+                    ) : (
+                      <span style={{ fontSize: 12, color: '#999' }}>已确认</span>
+                    )}
+                  </td>
+                </tr>
+              ))
             )}
-          </li>
-        ))}
-      </ul>
-
-      {!loading && filteredAlerts.length === 0 && (
-        <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
-          暂无告警
-        </div>
-      )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

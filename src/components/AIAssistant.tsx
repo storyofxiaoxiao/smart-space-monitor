@@ -3,6 +3,7 @@ import { XIcon, SendIcon, LoaderIcon } from '../icons';
 import aiAssistantIconUrl from '../assets/icons/ai-chat-icon.svg';
 import { chatApi, deviceApi, alertApi, workOrderApi } from '../api';
 import type { ChatMessage, Device, Alert, WorkOrder, WorkOrderPriority } from '../types';
+import { AssistantMessageBody } from './assistant/AssistantAlertReply';
 
 interface AIAssistantProps {
   isOpen: boolean;
@@ -32,6 +33,26 @@ const TOOL_INFO: Record<string, { label: string; description: string }> = {
   query_alerts: { label: '查询告警', description: '正在查询告警记录...' },
   create_work_order: { label: '创建工单', description: '正在创建工单...' },
 };
+
+/** 工具完成气泡与紧随其后的助手总结合并为一条展示（仍保留 tool 消息供多轮对话 API） */
+type DisplayItem = Message | { kind: 'paired'; tool: Message; assistant: Message };
+
+function toDisplayItems(messages: Message[]): DisplayItem[] {
+  const out: DisplayItem[] = [];
+  let i = 0;
+  while (i < messages.length) {
+    const m = messages[i];
+    const next = messages[i + 1];
+    if (m.role === 'tool' && next?.role === 'assistant') {
+      out.push({ kind: 'paired', tool: m, assistant: next });
+      i += 2;
+      continue;
+    }
+    out.push(m);
+    i++;
+  }
+  return out;
+}
 
 function formatChatApiError(err: unknown): string {
   if (err instanceof TypeError && err.message.includes('fetch')) {
@@ -338,7 +359,84 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {messages.map((message) => (
+            {toDisplayItems(messages).map((item) => {
+              if ('kind' in item && item.kind === 'paired') {
+                const { tool, assistant } = item;
+                return (
+                  <div
+                    key={`pair-${tool.id}`}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '8px',
+                        maxWidth: '92%',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '50%',
+                          backgroundColor: '#141414',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          marginTop: '4px',
+                        }}
+                      >
+                        <img src={aiAssistantIconUrl} alt="" width={16} height={16} style={{ display: 'block' }} />
+                      </div>
+                      <div>
+                        <div
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: '4px 16px 16px 16px',
+                            backgroundColor: '#fff',
+                            color: '#333',
+                            fontSize: '14px',
+                            lineHeight: 1.5,
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 12,
+                              color: '#389e0d',
+                              marginBottom: 8,
+                              fontWeight: 500,
+                            }}
+                          >
+                            {tool.content}
+                          </div>
+                          <AssistantMessageBody content={assistant.content} />
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '11px',
+                            color: '#999',
+                            marginTop: '4px',
+                            textAlign: 'left',
+                            padding: '0 4px',
+                          }}
+                        >
+                          {assistant.timestamp}
+                          <span style={{ marginLeft: '8px', color: '#bbb' }}>工具调用</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              const message = item as Message;
+              return (
               <div
                 key={message.id}
                 style={{
@@ -404,7 +502,11 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                           style={{ animation: 'spin 1s linear infinite', marginRight: '8px' }}
                         />
                       )}
-                      {message.content}
+                      {message.role === 'assistant' && !message.isProcessing ? (
+                        <AssistantMessageBody content={message.content} />
+                      ) : (
+                        message.content
+                      )}
                     </div>
                     <div
                       style={{
@@ -440,7 +542,8 @@ export function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
         )}

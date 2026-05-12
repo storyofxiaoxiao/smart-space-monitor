@@ -10,7 +10,21 @@ interface DeviceStatusCardProps {
   bgColor: string;
   count: number;
   typeCounts: Record<DeviceType, number>;
+  onMainCountClick: () => void;
+  onTypeCountClick: (type: DeviceType) => void;
 }
+
+const countBtnStyle: React.CSSProperties = {
+  cursor: 'pointer',
+  border: 'none',
+  background: 'transparent',
+  padding: '2px 6px',
+  margin: '-2px -6px',
+  borderRadius: '6px',
+  font: 'inherit',
+  textAlign: 'left' as const,
+  transition: 'background-color 0.15s ease',
+};
 
 export const DeviceStatusCard: React.FC<DeviceStatusCardProps> = ({
   icon: Icon,
@@ -19,6 +33,8 @@ export const DeviceStatusCard: React.FC<DeviceStatusCardProps> = ({
   bgColor,
   count,
   typeCounts,
+  onMainCountClick,
+  onTypeCountClick,
 }) => {
   return (
     <div
@@ -44,7 +60,20 @@ export const DeviceStatusCard: React.FC<DeviceStatusCardProps> = ({
           <Icon size={18} color={color} />
         </div>
         <div>
-          <div style={{ fontSize: '20px', fontWeight: 600, color: color }}>{count}</div>
+          <button
+            type="button"
+            title="按该状态筛选设备列表"
+            onClick={onMainCountClick}
+            style={{ ...countBtnStyle, display: 'block' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = `${color}22`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <span style={{ fontSize: '20px', fontWeight: 600, color }}>{count}</span>
+          </button>
           <div style={{ fontSize: '12px', color: '#999' }}>{label}</div>
         </div>
       </div>
@@ -52,10 +81,21 @@ export const DeviceStatusCard: React.FC<DeviceStatusCardProps> = ({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '8px' }}>
         {Object.entries(typeCounts).map(([type, typeCount]) => (
           <div key={type} style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '11px', color: '#999' }}>
-              {TYPE_CONFIG[type as DeviceType]?.label}
-            </div>
-            <div style={{ fontSize: '14px', fontWeight: 500, color: '#333' }}>{typeCount}</div>
+            <div style={{ fontSize: '11px', color: '#999' }}>{TYPE_CONFIG[type as DeviceType]?.label}</div>
+            <button
+              type="button"
+              title="按状态+类型筛选"
+              onClick={() => onTypeCountClick(type as DeviceType)}
+              style={{ ...countBtnStyle, fontSize: '14px', fontWeight: 500, color: '#333' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(24, 144, 255, 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              {typeCount}
+            </button>
           </div>
         ))}
       </div>

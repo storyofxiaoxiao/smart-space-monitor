@@ -41,10 +41,11 @@ describe('WorkOrderList', () => {
     render(<WorkOrderList />);
 
     await waitFor(() => {
+      expect(screen.getByText('WO-001')).toBeInTheDocument();
       expect(screen.getByText('测试工单')).toBeInTheDocument();
       expect(screen.getByText('设备_001')).toBeInTheDocument();
     });
-    expect(workOrderApi.getAll).toHaveBeenCalled();
+    expect(workOrderApi.getAll).toHaveBeenCalledWith();
   });
 
   it('should show create button', () => {

@@ -6,6 +6,9 @@ import type {
   AlertLevel,
 } from '../types';
 
+/** 设备列表、工单列表等表格分页条数 */
+export const LIST_PAGE_SIZE = 10;
+
 export const DEVICE_STATUSES = {
   normal: { label: '正常', color: '#52c41a', bgColor: '#f6ffed' },
   warning: { label: '告警', color: '#faad14', bgColor: '#fffbe6' },
@@ -24,7 +27,7 @@ export const DEVICE_TYPES = {
 export const TYPE_CONFIG = DEVICE_TYPES;
 
 export const WORK_ORDER_STATUSES = {
-  pending: { label: '待处理', color: '#faad14', bgColor: '#fffbe6' },
+  pending: { label: '待派单', color: '#faad14', bgColor: '#fffbe6' },
   assigned: { label: '已派单', color: '#722ed1', bgColor: '#f9f0ff' },
   in_progress: { label: '处理中', color: '#1890ff', bgColor: '#e6f7ff' },
   completed: { label: '已完成', color: '#52c41a', bgColor: '#f6ffed' },

@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { MonitorIcon, ElevatorIcon, AirIcon, DropletsIcon, LightbulbIcon, ShieldIcon, CheckCircleIcon, AlertTriangleIcon, AlertCircleIcon, WifiOffIcon } from '../icons';
 import { DEVICE_STATUSES } from '../constants';
-import type { Device } from '../types';
+import type { Device, DeviceStatus, DeviceType } from '../types';
 import { DeviceTypeCard } from './DeviceTypeCard';
 import { DeviceStatusCard } from './DeviceStatusCard';
 
 interface DeviceStatsProps {
   devices: Device[];
+  onPickType: (type: DeviceType | 'all') => void;
+  onPickStatus: (status: DeviceStatus | 'all') => void;
 }
 
 const TYPE_CONFIG: Record<string, { icon: typeof ElevatorIcon; label: string; color: string }> = {
@@ -26,30 +28,32 @@ const STATUS_CONFIG: Record<string, { icon: typeof CheckCircleIcon; label: strin
 
 type ViewMode = 'type' | 'status';
 
-export function DeviceStats({ devices }: DeviceStatsProps) {
+export function DeviceStats({ devices, onPickType, onPickStatus }: DeviceStatsProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('type');
 
   const totalCount = devices.length;
 
   const getStatsByType = () => {
-    return Object.entries(TYPE_CONFIG).map(([type, config]) => {
-      const typeDevices = devices.filter((d) => d.type === type);
-      const statusCounts = Object.entries(DEVICE_STATUSES).reduce((acc, [status]) => {
-        acc[status] = typeDevices.filter((d) => d.status === status).length;
+    return (Object.keys(TYPE_CONFIG) as DeviceType[]).map((typeKey) => {
+      const config = TYPE_CONFIG[typeKey];
+      const typeDevices = devices.filter((d) => d.type === typeKey);
+      const statusCounts = Object.keys(DEVICE_STATUSES).reduce((acc, status) => {
+        acc[status as DeviceStatus] = typeDevices.filter((d) => d.status === status).length;
         return acc;
-      }, {} as Record<string, number>);
-      return { ...config, count: typeDevices.length, statusCounts };
+      }, {} as Record<DeviceStatus, number>);
+      return { typeKey, ...config, count: typeDevices.length, statusCounts };
     });
   };
 
   const getStatsByStatus = () => {
-    return Object.entries(STATUS_CONFIG).map(([status, config]) => {
-      const statusDevices = devices.filter((d) => d.status === status);
-      const typeCounts = Object.entries(TYPE_CONFIG).reduce((acc, [type]) => {
+    return (Object.keys(STATUS_CONFIG) as DeviceStatus[]).map((statusKey) => {
+      const config = STATUS_CONFIG[statusKey];
+      const statusDevices = devices.filter((d) => d.status === statusKey);
+      const typeCounts = (Object.keys(TYPE_CONFIG) as DeviceType[]).reduce((acc, type) => {
         acc[type] = statusDevices.filter((d) => d.type === type).length;
         return acc;
-      }, {} as Record<string, number>);
-      return { ...config, count: statusDevices.length, typeCounts };
+      }, {} as Record<DeviceType, number>);
+      return { statusKey, ...config, count: statusDevices.length, typeCounts };
     });
   };
 
@@ -62,6 +66,7 @@ export function DeviceStats({ devices }: DeviceStatsProps) {
 
   return (
     <div style={{ marginBottom: '16px' }}>
+      <h2 style={{ margin: 0, marginBottom: '16px', fontSize: '18px', fontWeight: 600, color: '#333' }}>统计概览</h2>
       <div
         style={{
           backgroundColor: '#fff',
@@ -90,7 +95,7 @@ export function DeviceStats({ devices }: DeviceStatsProps) {
                   justifyContent: 'center',
                 }}
               >
-                <MonitorIcon size={18} color='#1890ff' />
+                <MonitorIcon size={18} color="#1890ff" />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontSize: '24px', fontWeight: 600, color: '#333' }}>{totalCount}</div>
@@ -104,7 +109,6 @@ export function DeviceStats({ devices }: DeviceStatsProps) {
                 </div>
               </div>
             </div>
-
           </div>
 
           <div
@@ -117,6 +121,7 @@ export function DeviceStats({ devices }: DeviceStatsProps) {
             }}
           >
             <button
+              type="button"
               onClick={() => setViewMode('type')}
               style={{
                 padding: '6px 14px',
@@ -133,6 +138,7 @@ export function DeviceStats({ devices }: DeviceStatsProps) {
               类型
             </button>
             <button
+              type="button"
               onClick={() => setViewMode('status')}
               style={{
                 padding: '6px 14px',
@@ -152,30 +158,44 @@ export function DeviceStats({ devices }: DeviceStatsProps) {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '32px 12px' }}>
-          {viewMode === 'type' ? (
-            statsByType.map(({ icon: Icon, label, color, count, statusCounts }) => (
-              <DeviceTypeCard
-                key={label}
-                icon={Icon}
-                label={label}
-                color={color}
-                count={count}
-                statusCounts={statusCounts}
-              />
-            ))
-          ) : (
-            statsByStatus.map(({ icon: Icon, label, color, bgColor, count, typeCounts }) => (
-              <DeviceStatusCard
-                key={label}
-                icon={Icon}
-                label={label}
-                color={color}
-                bgColor={bgColor}
-                count={count}
-                typeCounts={typeCounts}
-              />
-            ))
-          )}
+          {viewMode === 'type'
+            ? statsByType.map(({ icon: Icon, label, color, count, statusCounts, typeKey }) => (
+                <DeviceTypeCard
+                  key={typeKey}
+                  icon={Icon}
+                  label={label}
+                  color={color}
+                  count={count}
+                  statusCounts={statusCounts}
+                  onMainCountClick={() => {
+                    onPickType(typeKey);
+                    onPickStatus('all');
+                  }}
+                  onStatusCountClick={(status) => {
+                    onPickType(typeKey);
+                    onPickStatus(status);
+                  }}
+                />
+              ))
+            : statsByStatus.map(({ icon: Icon, label, color, bgColor, count, typeCounts, statusKey }) => (
+                <DeviceStatusCard
+                  key={statusKey}
+                  icon={Icon}
+                  label={label}
+                  color={color}
+                  bgColor={bgColor}
+                  count={count}
+                  typeCounts={typeCounts}
+                  onMainCountClick={() => {
+                    onPickStatus(statusKey);
+                    onPickType('all');
+                  }}
+                  onTypeCountClick={(type) => {
+                    onPickStatus(statusKey);
+                    onPickType(type);
+                  }}
+                />
+              ))}
         </div>
       </div>
     </div>

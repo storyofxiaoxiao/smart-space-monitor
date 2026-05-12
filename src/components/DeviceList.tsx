@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { SearchIcon, ChevronRightIcon } from '../icons';
-import { DEVICE_STATUSES, DEVICE_TYPES } from '../constants';
+import { LIST_PAGE_SIZE, DEVICE_STATUSES, DEVICE_TYPES } from '../constants';
+import { ListPaginationBar } from './ListPaginationBar';
 import { deviceApi } from '../api';
 import type { Device } from '../types';
 import { DeviceDetail } from './DeviceDetail';
@@ -9,15 +10,21 @@ import { FilterDropdown } from './FilterDropdown';
 interface DeviceListProps {
   buildingId: string;
   statusFilter: string;
-  onStatusChange: (status: string) => void;
+  typeFilter: string;
+  onTypeChange: (type: string) => void;
 }
 
-export function DeviceList({ buildingId, statusFilter, onStatusChange }: DeviceListProps) {
+export function DeviceList({
+  buildingId,
+  statusFilter,
+  typeFilter,
+  onTypeChange,
+}: DeviceListProps) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -36,26 +43,31 @@ export function DeviceList({ buildingId, statusFilter, onStatusChange }: DeviceL
       }
     };
 
-    fetchDevices();
+    void fetchDevices();
   }, [buildingId, statusFilter, typeFilter]);
 
-  const filteredDevices = devices.filter((device) =>
-    device.name.toLowerCase().includes(searchText.toLowerCase())
+  useEffect(() => {
+    setPage(1);
+  }, [buildingId, statusFilter, typeFilter, searchText]);
+
+  const filteredDevices = useMemo(
+    () => devices.filter((device) => device.name.toLowerCase().includes(searchText.toLowerCase())),
+    [devices, searchText],
   );
+
+  const total = filteredDevices.length;
+  const pageCount = Math.max(1, Math.ceil(total / LIST_PAGE_SIZE));
+  useEffect(() => {
+    setPage((prev) => Math.min(prev, pageCount));
+  }, [pageCount]);
+
+  const safePage = Math.min(page, pageCount);
+  const pagedDevices = filteredDevices.slice((safePage - 1) * LIST_PAGE_SIZE, safePage * LIST_PAGE_SIZE);
 
   const formatFloor = (floor: number) => {
     if (floor < 0) return `B${Math.abs(floor)}`;
     return `${floor}F`;
   };
-
-  const statusOptions = [
-    { value: 'all', label: '全部', color: '#999' },
-    ...Object.entries(DEVICE_STATUSES).map(([key, config]) => ({
-      value: key,
-      label: config.label,
-      color: config.color,
-    })),
-  ];
 
   const typeOptions = [
     { value: 'all', label: '全部', color: '#999' },
@@ -66,10 +78,34 @@ export function DeviceList({ buildingId, statusFilter, onStatusChange }: DeviceL
     })),
   ];
 
+  const thead = (
+    <thead>
+      <tr style={{ backgroundColor: '#fafafa' }}>
+        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>
+          设备名称
+        </th>
+        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>楼层</th>
+        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>类型</th>
+        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>状态</th>
+        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>操作</th>
+      </tr>
+    </thead>
+  );
+
   return (
     <div>
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ position: 'relative', width: '280px' }}>
+      <h2 style={{ margin: 0, marginBottom: '16px', fontSize: '18px', fontWeight: 600, color: '#333' }}>设备列表</h2>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          marginBottom: '16px',
+          gap: '12px',
+          flexWrap: 'wrap',
+        }}
+      >
+        <div style={{ position: 'relative', width: '280px', minWidth: '200px', flex: '0 1 280px' }}>
           <SearchIcon size={16} color="#999" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
@@ -86,42 +122,29 @@ export function DeviceList({ buildingId, statusFilter, onStatusChange }: DeviceL
           />
         </div>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <FilterDropdown
-            label="状态"
-            options={statusOptions}
-            value={statusFilter}
-            onChange={onStatusChange}
-            minWidth={100}
-          />
-          <FilterDropdown
-            label="类型"
-            options={typeOptions}
-            value={typeFilter}
-            onChange={setTypeFilter}
-            minWidth={110}
-          />
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <FilterDropdown label="类型" options={typeOptions} value={typeFilter} onChange={onTypeChange} minWidth={110} />
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>加载中...</div>
-      ) : filteredDevices.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>暂无设备</div>
-      ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#fafafa' }}>
-                <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>设备名称</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>楼层</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>类型</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>状态</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: '1px solid #e8e8e8', fontWeight: 500, color: '#666', fontSize: '14px' }}>操作</th>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff' }}>
+          {thead}
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={5} style={{ padding: '40px 16px', textAlign: 'center', color: '#999', borderBottom: '1px solid #f0f0f0' }}>
+                  加载中...
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredDevices.map((device) => {
+            ) : filteredDevices.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ padding: '40px 16px', textAlign: 'center', color: '#999', borderBottom: '1px solid #f0f0f0' }}>
+                  暂无设备
+                </td>
+              </tr>
+            ) : (
+              pagedDevices.map((device) => {
                 const status = DEVICE_STATUSES[device.status] || { label: device.status, color: '#999', bgColor: '#f5f5f5' };
                 const type = DEVICE_TYPES[device.type] || { label: device.type, color: '#999' };
                 return (
@@ -131,7 +154,7 @@ export function DeviceList({ buildingId, statusFilter, onStatusChange }: DeviceL
                     style={{
                       cursor: 'pointer',
                       borderBottom: '1px solid #f0f0f0',
-                      transition: 'background-color 0.2s'
+                      transition: 'background-color 0.2s',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = '#fafafa';
@@ -143,7 +166,9 @@ export function DeviceList({ buildingId, statusFilter, onStatusChange }: DeviceL
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{ fontWeight: 500 }}>{device.name}</span>
                     </td>
-                    <td style={{ padding: '12px 16px' }}>{buildingId}-{formatFloor(device.floor)}</td>
+                    <td style={{ padding: '12px 16px' }}>
+                      {buildingId}-{formatFloor(device.floor)}
+                    </td>
                     <td style={{ padding: '12px 16px' }}>{type.label}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <span
@@ -160,6 +185,7 @@ export function DeviceList({ buildingId, statusFilter, onStatusChange }: DeviceL
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedDevice(device);
@@ -182,18 +208,15 @@ export function DeviceList({ buildingId, statusFilter, onStatusChange }: DeviceL
                     </td>
                   </tr>
                 );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {selectedDevice && (
-        <DeviceDetail
-          device={selectedDevice}
-          onClose={() => setSelectedDevice(null)}
-        />
-      )}
+      <ListPaginationBar total={total} page={page} pageSize={LIST_PAGE_SIZE} onPageChange={setPage} />
+
+      {selectedDevice && <DeviceDetail device={selectedDevice} onClose={() => setSelectedDevice(null)} />}
     </div>
   );
 }
