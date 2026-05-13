@@ -173,7 +173,6 @@ export function CreateWorkOrderModal({
       width={480}
       zIndex={overlayZIndex}
       onClose={onClose}
-      preventBackdropClose={loading}
       form={{ onSubmit: handleSubmit, noValidate: true }}
       slots={{
         title: '创建工单',

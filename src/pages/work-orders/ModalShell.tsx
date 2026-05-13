@@ -1,4 +1,4 @@
-import type { CSSProperties, FormHTMLAttributes, MouseEvent, ReactNode } from 'react';
+import type { CSSProperties, FormHTMLAttributes, ReactNode } from 'react';
 import { XIcon } from '../../components/icons';
 
 /** 弹窗底部次要按钮（取消 / 关闭） */
@@ -43,8 +43,6 @@ export type ModalShellProps = {
   width?: number;
   /** 遮罩层 z-index，用于叠在其它全屏弹窗之上 */
   zIndex?: number;
-  /** 为 true 时点击遮罩不触发 onClose */
-  preventBackdropClose?: boolean;
   slots: ModalShellSlots;
   /** 若传入，则将 body 与 footer 包在同一 `<form>` 内（如创建工单） */
   form?: Pick<FormHTMLAttributes<HTMLFormElement>, 'id' | 'onSubmit' | 'noValidate'>;
@@ -52,6 +50,7 @@ export type ModalShellProps = {
 
 /**
  * 统一遮罩 + 白底卡片 + 标题栏 + 可滚动内容 + 可选底栏。
+ * 点击遮罩不关闭，仅通过标题栏关闭按钮或底部显式按钮调用 `onClose`。
  * 业务弹窗通过 `slots` 注入各自内容。
  */
 export function ModalShell({
@@ -59,17 +58,10 @@ export function ModalShell({
   onClose,
   width = 520,
   zIndex = 1000,
-  preventBackdropClose = false,
   slots,
   form,
 }: ModalShellProps) {
   if (!open) return null;
-
-  const handleBackdropMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && !preventBackdropClose) {
-      onClose();
-    }
-  };
 
   const scrollBody = (
     <div
@@ -126,7 +118,6 @@ export function ModalShell({
         justifyContent: 'center',
         zIndex,
       }}
-      onMouseDown={handleBackdropMouseDown}
     >
       <div
         role="dialog"
@@ -142,7 +133,6 @@ export function ModalShell({
           display: 'flex',
           flexDirection: 'column',
         }}
-        onMouseDown={(e) => e.stopPropagation()}
       >
         <header
           style={{

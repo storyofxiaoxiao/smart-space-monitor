@@ -1,5 +1,4 @@
 import { useState, useEffect, Fragment } from 'react';
-import { CheckCircleIcon, AlertCircleIcon, ClockCircleIcon, WrenchIcon } from '../../components/icons';
 import { WORK_ORDER_STATUSES, WORK_ORDER_PRIORITIES, getStatusConfig } from '../../constants';
 import { workOrderApi } from '../../api';
 import type { WorkOrder, WorkOrderStatus } from '../../types';
@@ -44,12 +43,6 @@ export function WorkOrderDetail({ workOrder, onClose, onUpdated }: WorkOrderDeta
 
   const status = getStatusConfig(WORK_ORDER_STATUSES, wo.status);
   const priority = WORK_ORDER_PRIORITIES[wo.priority] || { label: '中', color: '#faad14' };
-  const StatusIcon =
-    wo.status === 'completed'
-      ? CheckCircleIcon
-      : wo.status === 'pending'
-        ? ClockCircleIcon
-        : AlertCircleIcon;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('zh-CN', {
@@ -89,7 +82,6 @@ export function WorkOrderDetail({ workOrder, onClose, onUpdated }: WorkOrderDeta
       open
       width={540}
       onClose={onClose}
-      preventBackdropClose={advancing}
       slots={{
         title: '工单详情',
         body: (
@@ -119,7 +111,6 @@ export function WorkOrderDetail({ workOrder, onClose, onUpdated }: WorkOrderDeta
                     fontSize: '12px',
                   }}
                 >
-                  <StatusIcon size={12} />
                   {status.label}
                 </span>
               </div>
@@ -142,7 +133,6 @@ export function WorkOrderDetail({ workOrder, onClose, onUpdated }: WorkOrderDeta
             <div style={{ marginBottom: '16px' }}>
               <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>关联设备</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <WrenchIcon size={16} color="#666" />
                 <span>{wo.deviceName}</span>
               </div>
             </div>
