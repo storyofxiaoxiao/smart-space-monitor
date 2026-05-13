@@ -1,6 +1,6 @@
 # 交付物 2：Bug 修复说明（`DeviceAlertPanel`）
 
-题目附件 **`attachments/buggy-component.tsx`** 内含 **3 处故意缺陷**（见该文件注释与 `← 留意这里` 等标记）。修复后的实现位于 **`src/components/DeviceAlertPanel.tsx`**（与附件组件职责一致，并补充表格等展示）；单测 **`src/components/__tests__/DeviceAlertPanel.test.tsx`** 覆盖三处修复行为。
+题目附件 **`attachments/buggy-component.tsx`** 内含 **3 处故意缺陷**（见该文件注释与 `← 留意这里` 等标记）。修复后的实现位于 **`src/pages/devices/DeviceAlertPanel.tsx`**（与附件组件职责一致，并补充表格等展示）；单测 **`src/pages/devices/__tests__/DeviceAlertPanel.test.tsx`** 覆盖三处修复行为。
 
 主界面与 **`attachments/wireframes.md`** 对齐：**不在设备看板底部挂载**该面板；Mock 告警在 **设备详情弹窗**「最近告警」表格中展示（级别、告警内容、时间、确认状态），数据来自 `GET /api/devices/:id` 的 `alerts`。`DeviceAlertPanel` 仍可作为「附件 Bug 修复」的独立交付对照。
 

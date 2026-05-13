@@ -6,7 +6,7 @@
 |------|------|----------|
 | 应用壳层 | 三栏布局（左楼栋 / 中内容 / 右可选 AI）、Tab、当前楼栋设备拉取（供统计） | `App.tsx` |
 | 设备看板 | 统计卡片、列表与筛选、设备详情弹窗（**最近告警**以表格展示：级别、告警内容、时间、确认状态） | `DeviceStats`、`DeviceList`、`DeviceDetail`、`FilterDropdown` |
-| 工单 | 列表（编号/状态筛选）、创建弹窗、详情与**状态推进** | `WorkOrderList`、`WorkOrderDetail`、`CreateWorkOrderModal` |
+| 工单 | 列表（编号/状态筛选）、创建弹窗（**全局**由 `CreateWorkOrderDialogContext` 挂载，列表与设备详情共用）、详情与**状态推进** | `WorkOrderList`、`WorkOrderDetail`、`CreateWorkOrderModal`、`CreateWorkOrderDialogContext` |
 | AI | 侧栏对话、Tool Calling 循环、错误提示 | `AIAssistant` |
 | 数据访问 | 统一 `fetch` 封装，避免把 `undefined` 写进查询串 | `api/index.ts` |
 | 工程健壮性 | 根级错误边界，避免渲染异常白屏 | `ErrorBoundary`、`main.tsx` |
@@ -41,5 +41,5 @@
 ## 6. 本地运行与构建（交付物 1）
 
 1. 终端 A：`cd attachments/mock-server && npm install && node server.js`（端口 3001）。
-2. 终端 B：项目根目录 `pnpm install && pnpm dev`（或 `npm install && npm run dev`）。
+2. 终端 B：项目根目录 `pnpm install && pnpm dev`。
 3. 提交前执行 `pnpm run build`（或 `npm run build`）确保 `tsc && vite build` 无报错。

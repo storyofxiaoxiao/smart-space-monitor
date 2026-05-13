@@ -16,7 +16,7 @@ import {
   modalShellSecondaryButtonStyle,
 } from './ModalShell';
 import { workOrderApi, deviceApi } from '../../api';
-import type { Device, WorkOrderPriority } from '../../types';
+import type { CreateWorkOrderRequest, Device, WorkOrderPriority } from '../../types';
 
 interface CreateWorkOrderModalProps {
   isOpen: boolean;
@@ -61,6 +61,29 @@ const fieldStackStyle: CSSProperties = {
   flexDirection: 'column',
   gap: '16px',
 };
+
+/**
+ * 在 `workOrderApi.create` → `JSON.stringify` 之前收口请求体：
+ * - 字符串已由调用方 trim，此处只做「可 POST 的 JSON 对象」形状与业务校验；
+ * - 确认 deviceId 仍落在当前下拉数据内，避免列表刷新后陈旧选项被提交；
+ * - priority 收窄为合法枚举，与后端/Mock 约定一致。
+ */
+function buildCreateWorkOrderRequest(
+  devices: Device[],
+  input: { title: string; description: string; deviceId: string; priority: WorkOrderPriority },
+): CreateWorkOrderRequest | null {
+  if (!devices.some((d) => d.id === input.deviceId)) return null;
+  const priority: WorkOrderPriority =
+    input.priority === 'high' || input.priority === 'low' || input.priority === 'medium'
+      ? input.priority
+      : 'medium';
+  return {
+    title: input.title,
+    description: input.description,
+    deviceId: input.deviceId,
+    priority,
+  };
+}
 
 export function CreateWorkOrderModal({
   isOpen,
@@ -118,14 +141,24 @@ export function CreateWorkOrderModal({
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
+    const body = buildCreateWorkOrderRequest(devices, {
+      title: trimmedTitle,
+      description: trimmedDescription,
+      deviceId,
+      priority,
+    });
+    if (!body) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        deviceId: '设备列表已更新，请重新选择关联设备',
+      }));
+      void fetchDevices();
+      return;
+    }
+
     setLoading(true);
     try {
-      await workOrderApi.create({
-        title: trimmedTitle,
-        description: trimmedDescription,
-        priority,
-        deviceId,
-      });
+      await workOrderApi.create(body);
       onCreate();
     } catch {
       setError('创建工单失败，请重试');
