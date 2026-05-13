@@ -5,15 +5,15 @@ import { ListPaginationBar } from '../../components/ListPaginationBar';
 import { workOrderApi } from '../../api';
 import type { WorkOrder } from '../../types';
 import { WorkOrderDetail } from './WorkOrderDetail';
-import { CreateWorkOrderModal } from './CreateWorkOrderModal';
 import { FilterDropdown } from '../../components/FilterDropdown';
+import { useCreateWorkOrderDialog } from '../../components/CreateWorkOrderDialogContext';
 
 export function WorkOrderList() {
+  const { open: openCreateWorkOrder } = useCreateWorkOrderDialog();
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [page, setPage] = useState(1);
 
   const loadWorkOrders = useCallback(async () => {
@@ -49,7 +49,6 @@ export function WorkOrderList() {
   const pagedWorkOrders = workOrders.slice((safePage - 1) * LIST_PAGE_SIZE, safePage * LIST_PAGE_SIZE);
 
   const handleWorkOrderCreated = () => {
-    setShowCreateModal(false);
     void loadWorkOrders();
   };
 
@@ -151,7 +150,7 @@ export function WorkOrderList() {
         </div>
         <button
           type="button"
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => openCreateWorkOrder({ onSuccess: handleWorkOrderCreated })}
           style={{
             padding: '8px 16px',
             borderRadius: '4px',
@@ -281,14 +280,6 @@ export function WorkOrderList() {
           workOrder={selectedWorkOrder}
           onClose={() => setSelectedWorkOrder(null)}
           onUpdated={handleDetailUpdated}
-        />
-      )}
-
-      {showCreateModal && (
-        <CreateWorkOrderModal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onCreate={handleWorkOrderCreated}
         />
       )}
     </div>

@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react';
 import { XIcon, AlertTriangleIcon, ClockCircleIcon } from '../../components/icons';
 import { DEVICE_STATUSES, ALERT_LEVELS, getStatusConfig } from '../../constants';
 import { deviceApi } from '../../api';
+import { useCreateWorkOrderDialog } from '../../components/CreateWorkOrderDialogContext';
 import type { Device } from '../../types';
 
 interface DeviceDetailProps {
   device: Device;
   onClose: () => void;
-  onCreateWorkOrder?: (deviceId: string) => void;
 }
 
-export function DeviceDetail({ device, onClose, onCreateWorkOrder }: DeviceDetailProps) {
+export function DeviceDetail({ device, onClose }: DeviceDetailProps) {
+  const { open: openCreateWorkOrder } = useCreateWorkOrderDialog();
   const [deviceWithAlerts, setDeviceWithAlerts] = useState<Device | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -264,9 +265,9 @@ export function DeviceDetail({ device, onClose, onCreateWorkOrder }: DeviceDetai
 
             <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
               <button
+                type="button"
                 onClick={() => {
-                  onCreateWorkOrder?.(device.id);
-                  onClose();
+                  openCreateWorkOrder({ initialDeviceId: device.id });
                 }}
                 style={{
                   padding: '8px 16px',

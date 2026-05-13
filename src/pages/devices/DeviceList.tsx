@@ -240,7 +240,9 @@ export function DeviceList({
 
       <ListPaginationBar total={total} page={page} pageSize={LIST_PAGE_SIZE} onPageChange={setPage} />
 
-      {selectedDevice && <DeviceDetail device={selectedDevice} onClose={() => setSelectedDevice(null)} />}
+      {selectedDevice && (
+        <DeviceDetail device={selectedDevice} onClose={() => setSelectedDevice(null)} />
+      )}
     </div>
   );
 }

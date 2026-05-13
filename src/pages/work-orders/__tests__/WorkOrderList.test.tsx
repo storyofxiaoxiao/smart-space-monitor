@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { CreateWorkOrderDialogProvider } from '../../../components/CreateWorkOrderDialogContext';
 import { WorkOrderList } from '../WorkOrderList';
 import { workOrderApi } from '../../../api';
 
@@ -15,6 +16,13 @@ vi.mock('../../../api', async (importOriginal) => {
 });
 
 describe('WorkOrderList', () => {
+  const renderList = () =>
+    render(
+      <CreateWorkOrderDialogProvider>
+        <WorkOrderList />
+      </CreateWorkOrderDialogProvider>,
+    );
+
   const mockWorkOrders = [
     {
       id: 'WO-001',
@@ -38,7 +46,7 @@ describe('WorkOrderList', () => {
   });
 
   it('should display work orders correctly', async () => {
-    render(<WorkOrderList />);
+    renderList();
 
     await waitFor(() => {
       expect(screen.getByText('WO-001')).toBeInTheDocument();
@@ -49,7 +57,7 @@ describe('WorkOrderList', () => {
   });
 
   it('should show create button', () => {
-    render(<WorkOrderList />);
+    renderList();
 
     const buttons = screen.getAllByRole('button', { name: /创建工单/i });
     expect(buttons.length).toBeGreaterThanOrEqual(1);
@@ -58,7 +66,7 @@ describe('WorkOrderList', () => {
   it('should show empty state when API returns no work orders', async () => {
     vi.mocked(workOrderApi.getAll).mockResolvedValue([]);
 
-    render(<WorkOrderList />);
+    renderList();
 
     await waitFor(() => {
       expect(screen.getByText('暂无工单')).toBeInTheDocument();

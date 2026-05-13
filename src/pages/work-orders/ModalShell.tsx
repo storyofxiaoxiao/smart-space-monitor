@@ -41,6 +41,8 @@ export type ModalShellProps = {
   onClose: () => void;
   /** 面板宽度（px） */
   width?: number;
+  /** 遮罩层 z-index，用于叠在其它全屏弹窗之上 */
+  zIndex?: number;
   /** 为 true 时点击遮罩不触发 onClose */
   preventBackdropClose?: boolean;
   slots: ModalShellSlots;
@@ -56,6 +58,7 @@ export function ModalShell({
   open,
   onClose,
   width = 520,
+  zIndex = 1000,
   preventBackdropClose = false,
   slots,
   form,
@@ -121,7 +124,7 @@ export function ModalShell({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000,
+        zIndex,
       }}
       onMouseDown={handleBackdropMouseDown}
     >

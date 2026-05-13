@@ -9,6 +9,7 @@ import { MonitorIcon, FileTextIcon, ApartmentIcon } from './components/icons';
 import aiAssistantIconUrl from './assets/icons/ai-chat-icon.svg';
 import { DeviceDashboardPage } from './pages/devices/DeviceDashboardPage';
 import { UserAccountMenu } from './components/UserAccountMenu';
+import { CreateWorkOrderDialogProvider } from './components/CreateWorkOrderDialogContext';
 
 const WorkOrdersPage = lazy(() =>
   import('./pages/work-orders/WorkOrdersPage').then((m) => ({ default: m.WorkOrdersPage })),
@@ -28,7 +29,8 @@ function AppShell() {
   const tabValue = pathname.startsWith(ROUTES.workOrders) ? ROUTES.workOrders : ROUTES.devices;
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <CreateWorkOrderDialogProvider>
+      <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', minWidth: 0 }}>
         <Box
           sx={{
@@ -158,6 +160,7 @@ function AppShell() {
         </Box>
       )}
     </Box>
+    </CreateWorkOrderDialogProvider>
   );
 }
 

@@ -22,6 +22,10 @@ interface CreateWorkOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreate: () => void;
+  /** 打开时预选的设备 id（需在设备下拉列表中存在） */
+  initialDeviceId?: string;
+  /** 遮罩 z-index，需高于设备详情等下层弹窗 */
+  overlayZIndex?: number;
 }
 
 const PRIORITY_OPTIONS: { value: WorkOrderPriority; label: string }[] = [
@@ -58,7 +62,13 @@ const fieldStackStyle: CSSProperties = {
   gap: '16px',
 };
 
-export function CreateWorkOrderModal({ isOpen, onClose, onCreate }: CreateWorkOrderModalProps) {
+export function CreateWorkOrderModal({
+  isOpen,
+  onClose,
+  onCreate,
+  initialDeviceId,
+  overlayZIndex = 1000,
+}: CreateWorkOrderModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<WorkOrderPriority>('medium');
@@ -88,6 +98,13 @@ export function CreateWorkOrderModal({ isOpen, onClose, onCreate }: CreateWorkOr
       void fetchDevices();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !initialDeviceId || devices.length === 0) return;
+    if (devices.some((d) => d.id === initialDeviceId)) {
+      setDeviceId(initialDeviceId);
+    }
+  }, [isOpen, initialDeviceId, devices]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -121,6 +138,7 @@ export function CreateWorkOrderModal({ isOpen, onClose, onCreate }: CreateWorkOr
     <ModalShell
       open={isOpen}
       width={480}
+      zIndex={overlayZIndex}
       onClose={onClose}
       preventBackdropClose={loading}
       form={{ onSubmit: handleSubmit, noValidate: true }}
