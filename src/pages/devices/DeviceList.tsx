@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { SearchIcon, ChevronRightIcon } from '../icons';
-import { LIST_PAGE_SIZE, DEVICE_STATUSES, DEVICE_TYPES } from '../constants';
-import { ListPaginationBar } from './ListPaginationBar';
-import { deviceApi } from '../api';
-import type { Device } from '../types';
+import { SearchIcon, ChevronRightIcon } from '../../components/icons';
+import { LIST_PAGE_SIZE, DEVICE_STATUSES, DEVICE_TYPES } from '../../constants';
+import { ListPaginationBar } from '../../components/ListPaginationBar';
+import { deviceApi } from '../../api';
+import type { Device } from '../../types';
 import { DeviceDetail } from './DeviceDetail';
-import { FilterDropdown } from './FilterDropdown';
+import { FilterDropdown } from '../../components/FilterDropdown';
 
 interface DeviceListProps {
   buildingId: string;
@@ -63,6 +63,13 @@ export function DeviceList({
 
   const safePage = Math.min(page, pageCount);
   const pagedDevices = filteredDevices.slice((safePage - 1) * LIST_PAGE_SIZE, safePage * LIST_PAGE_SIZE);
+
+  const hasListFilters = searchText.trim() !== '' || typeFilter !== 'all';
+
+  const handleClearFilters = () => {
+    setSearchText('');
+    onTypeChange('all');
+  };
 
   const formatFloor = (floor: number) => {
     if (floor < 0) return `B${Math.abs(floor)}`;
@@ -124,6 +131,23 @@ export function DeviceList({
 
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
           <FilterDropdown label="类型" options={typeOptions} value={typeFilter} onChange={onTypeChange} minWidth={110} />
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            disabled={!hasListFilters}
+            style={{
+              padding: '8px 14px',
+              borderRadius: '4px',
+              border: '1px solid #d9d9d9',
+              backgroundColor: '#fff',
+              color: '#666',
+              cursor: hasListFilters ? 'pointer' : 'not-allowed',
+              fontSize: '14px',
+              opacity: hasListFilters ? 1 : 0.55,
+            }}
+          >
+            清除条件
+          </button>
         </div>
       </div>
 

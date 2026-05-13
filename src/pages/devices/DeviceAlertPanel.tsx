@@ -10,6 +10,9 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import Select, { type SelectChangeEvent } from '@mui/material/Select';
 
 interface Alert {
   id: string;
@@ -103,17 +106,28 @@ export const DeviceAlertPanel: React.FC<DeviceAlertPanelProps> = ({
           </span>
         </h3>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            style={{ padding: '4px 8px' }}
-          >
-            <option value="all">全部</option>
-            <option value="critical">严重</option>
-            <option value="warning">警告</option>
-            <option value="info">信息</option>
-            <option value="unacknowledged">未确认</option>
-          </select>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <Select
+              value={filter}
+              onChange={(e: SelectChangeEvent<string>) => setFilter(e.target.value)}
+              inputProps={{ 'aria-label': '告警筛选' }}
+              MenuProps={{
+                anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                transformOrigin: { vertical: 'top', horizontal: 'left' },
+              }}
+              sx={{
+                fontSize: 14,
+                borderRadius: 1,
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d9d9d9' },
+              }}
+            >
+              <MenuItem value="all">全部</MenuItem>
+              <MenuItem value="critical">严重</MenuItem>
+              <MenuItem value="warning">警告</MenuItem>
+              <MenuItem value="info">信息</MenuItem>
+              <MenuItem value="unacknowledged">未确认</MenuItem>
+            </Select>
+          </FormControl>
           <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14 }}>
             <input
               type="checkbox"

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { XIcon, AlertTriangleIcon, ClockCircleIcon } from '../icons';
-import { DEVICE_STATUSES, ALERT_LEVELS, getStatusConfig } from '../constants';
-import { deviceApi } from '../api';
-import type { Device } from '../types';
+import { XIcon, AlertTriangleIcon, ClockCircleIcon } from '../../components/icons';
+import { DEVICE_STATUSES, ALERT_LEVELS, getStatusConfig } from '../../constants';
+import { deviceApi } from '../../api';
+import type { Device } from '../../types';
 
 interface DeviceDetailProps {
   device: Device;

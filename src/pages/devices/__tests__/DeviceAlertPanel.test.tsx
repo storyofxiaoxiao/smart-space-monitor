@@ -58,9 +58,11 @@ describe('DeviceAlertPanel', () => {
       expect(container.textContent).toContain('设备_001');
     });
 
-    const select = container.querySelector('select');
-    expect(select).toBeTruthy();
-    fireEvent.change(select!, { target: { value: 'critical' } });
+    fireEvent.mouseDown(screen.getByLabelText('告警筛选'));
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: '严重' })).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('option', { name: '严重' }));
 
     expect(screen.queryByText('设备_001')).not.toBeInTheDocument();
     expect(screen.getByText('设备_002')).toBeInTheDocument();

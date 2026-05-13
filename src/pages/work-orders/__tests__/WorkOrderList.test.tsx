@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { WorkOrderList } from '../WorkOrderList';
-import { workOrderApi } from '../../api';
+import { workOrderApi } from '../../../api';
 
-vi.mock('../../api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../api')>();
+vi.mock('../../../api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../api')>();
   return {
     ...actual,
     workOrderApi: {

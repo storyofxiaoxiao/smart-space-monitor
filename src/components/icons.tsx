@@ -139,6 +139,17 @@ export function PlusIcon({ size = 20, color = '#666', ...props }: IconProps) {
   );
 }
 
+/** 侧栏抽屉菜单（三线） */
+export function MenuIcon({ size = 20, color = '#666', ...props }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="18" x2="20" y2="18" />
+    </svg>
+  );
+}
+
 export function FilterIcon({ size = 20, color = '#666', ...props }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>

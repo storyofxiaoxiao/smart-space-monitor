@@ -36,7 +36,7 @@
 | 统计区与列表区各拉一次设备 | 多一次 HTTP，但筛选逻辑留在 `DeviceList`，`App` 只负责当前楼栋全量设备供 `DeviceStats`，结构更简单。 |
 | 工单详情内本地 `wo` state + `onUpdated` 回写列表 | 避免整表重拉即可更新一行；关闭详情后列表已与后端一致。 |
 | `deviceApi.getAll` 手写 `URLSearchParams` | 避免 `type=undefined` 被序列化导致 Mock 过滤结果为空（真实踩坑）。 |
-| 样式以 inline + **MUI**（`Box` / `Tabs` / `Button`）为主，图标保留自研 `src/icons` | 减少全局 CSS，布局与主题通过 `ThemeProvider` 统一主色。 |
+| 样式以 inline + **MUI**（`Box` / `Tabs` / `Button`）为主，图标保留自研 `src/components/icons.tsx` | 减少全局 CSS，布局与主题通过 `ThemeProvider` 统一主色。 |
 
 ## 6. 本地运行与构建（交付物 1）
 

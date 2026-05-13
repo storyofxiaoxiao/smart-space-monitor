@@ -3,7 +3,7 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { ChevronDownIcon } from '../icons';
+import { ChevronDownIcon } from './icons';
 
 /** 顶栏演示用：假登录用户与下拉项（无真实鉴权） */
 export function UserAccountMenu() {

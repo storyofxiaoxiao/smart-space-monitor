@@ -1,4 +1,4 @@
-import { DEVICE_STATUSES } from '../constants';
+import { DEVICE_STATUSES } from '../../constants';
 
 type Option = {
   value: string;

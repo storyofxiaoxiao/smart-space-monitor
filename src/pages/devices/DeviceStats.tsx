@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { MonitorIcon, ElevatorIcon, AirIcon, DropletsIcon, LightbulbIcon, ShieldIcon, CheckCircleIcon, AlertTriangleIcon, AlertCircleIcon, WifiOffIcon } from '../icons';
-import { DEVICE_STATUSES } from '../constants';
-import type { Device, DeviceStatus, DeviceType } from '../types';
+import { MonitorIcon, ElevatorIcon, AirIcon, DropletsIcon, LightbulbIcon, ShieldIcon, CheckCircleIcon, AlertTriangleIcon, AlertCircleIcon, WifiOffIcon } from '../../components/icons';
+import { DEVICE_STATUSES } from '../../constants';
+import type { Device, DeviceStatus, DeviceType } from '../../types';
 import { DeviceTypeCard } from './DeviceTypeCard';
 import { DeviceStatusCard } from './DeviceStatusCard';
 

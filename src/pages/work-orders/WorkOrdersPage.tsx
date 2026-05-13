@@ -2,9 +2,7 @@ import { lazy, Suspense } from 'react';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 
-const WorkOrderList = lazy(() =>
-  import('../components/WorkOrderList').then((m) => ({ default: m.WorkOrderList })),
-);
+const WorkOrderList = lazy(() => import('./WorkOrderList').then((m) => ({ default: m.WorkOrderList })));
 
 export function WorkOrdersPage() {
   return (

@@ -5,7 +5,7 @@
 在本 take-home 项目中，主要使用 **Cursor**（对话式 AI 编码助手）辅助开发。集中使用的环节包括：
 
 1. **脚手架与类型**：根据 `api-spec.md` 快速生成 `types`、`api/index.ts` 中的请求封装，减少手写 `fetch` 与重复类型声明时间。
-2. **布局与组件拆分**：Material UI（`Box`、`Tabs`）与自定义 inline 样式、`src/icons` 自绘图标混用时，用 AI 生成初版结构，再人工收紧样式与可访问性（如按钮、`alt`）。
+2. **布局与组件拆分**：Material UI（`Box`、`Tabs`）与自定义 inline 样式、`src/components/icons.tsx` 自绘图标混用时，用 AI 生成初版结构，再人工收紧样式与可访问性（如按钮、`alt`）。
 3. **AI 侧栏与 Tool Calling**：对照题目描述，让 AI 起草「`while` 循环 + 追加 assistant/tool 消息再请求」的流程，再由开发者核对边界：空 `content`、`tool_calls` 多轮、错误分支与「处理中」气泡的替换逻辑。
 4. **测试与构建**：Vitest + Testing Library 的配置、`URLSearchParams` 与 `undefined` 导致的线上问题，借助 AI 快速定位类似案例并生成回归用例。
 

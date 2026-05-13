@@ -1,7 +1,7 @@
 import React from 'react';
-import type { DeviceType } from '../types';
-import { TYPE_CONFIG } from '../constants';
-import { IconProps } from '../icons';
+import type { DeviceType } from '../../types';
+import { TYPE_CONFIG } from '../../constants';
+import type { IconProps } from '../../components/icons';
 
 interface DeviceStatusCardProps {
   icon: React.ComponentType<IconProps>;

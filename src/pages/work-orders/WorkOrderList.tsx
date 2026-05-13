@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PlusIcon, CheckCircleIcon, AlertCircleIcon, ClockCircleIcon, ChevronRightIcon } from '../icons';
-import { LIST_PAGE_SIZE, WORK_ORDER_STATUSES, WORK_ORDER_PRIORITIES, getStatusConfig } from '../constants';
-import { ListPaginationBar } from './ListPaginationBar';
-import { workOrderApi } from '../api';
-import type { WorkOrder } from '../types';
+import { PlusIcon, ChevronRightIcon } from '../../components/icons';
+import { LIST_PAGE_SIZE, WORK_ORDER_STATUSES, WORK_ORDER_PRIORITIES, getStatusConfig } from '../../constants';
+import { ListPaginationBar } from '../../components/ListPaginationBar';
+import { workOrderApi } from '../../api';
+import type { WorkOrder } from '../../types';
 import { WorkOrderDetail } from './WorkOrderDetail';
 import { CreateWorkOrderModal } from './CreateWorkOrderModal';
-import { FilterDropdown } from './FilterDropdown';
+import { FilterDropdown } from '../../components/FilterDropdown';
 
 export function WorkOrderList() {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
@@ -76,6 +76,12 @@ export function WorkOrderList() {
     })),
   ];
 
+  const hasStatusFilter = statusFilter !== 'all';
+
+  const handleClearStatusFilter = () => {
+    setStatusFilter('all');
+  };
+
   const thead = (
     <thead>
       <tr style={{ backgroundColor: '#fafafa' }}>
@@ -117,13 +123,32 @@ export function WorkOrderList() {
           gap: '12px',
         }}
       >
-        <FilterDropdown
-          label="状态"
-          options={statusOptions}
-          value={statusFilter}
-          onChange={setStatusFilter}
-          minWidth={120}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <FilterDropdown
+            label="状态"
+            options={statusOptions}
+            value={statusFilter}
+            onChange={setStatusFilter}
+            minWidth={120}
+          />
+          <button
+            type="button"
+            onClick={handleClearStatusFilter}
+            disabled={!hasStatusFilter}
+            style={{
+              padding: '8px 14px',
+              borderRadius: '4px',
+              border: '1px solid #d9d9d9',
+              backgroundColor: '#fff',
+              color: '#666',
+              cursor: hasStatusFilter ? 'pointer' : 'not-allowed',
+              fontSize: '14px',
+              opacity: hasStatusFilter ? 1 : 0.55,
+            }}
+          >
+            清除条件
+          </button>
+        </div>
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
@@ -165,12 +190,6 @@ export function WorkOrderList() {
               pagedWorkOrders.map((workOrder) => {
                 const status = getStatusConfig(WORK_ORDER_STATUSES, workOrder.status);
                 const priority = WORK_ORDER_PRIORITIES[workOrder.priority] || { label: '中', color: '#faad14' };
-                const StatusIcon =
-                  workOrder.status === 'completed'
-                    ? CheckCircleIcon
-                    : workOrder.status === 'pending'
-                      ? ClockCircleIcon
-                      : AlertCircleIcon;
 
                 return (
                   <tr
@@ -199,7 +218,6 @@ export function WorkOrderList() {
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '4px',
                           padding: '2px 8px',
                           borderRadius: '4px',
                           backgroundColor: status.bgColor,
@@ -207,7 +225,6 @@ export function WorkOrderList() {
                           fontSize: '12px',
                         }}
                       >
-                        <StatusIcon size={12} />
                         {status.label}
                       </span>
                     </td>

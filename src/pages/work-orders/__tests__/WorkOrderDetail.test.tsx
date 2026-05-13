@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { WorkOrderDetail } from '../WorkOrderDetail';
-import { workOrderApi } from '../../api';
-import type { WorkOrder } from '../../types';
+import { workOrderApi } from '../../../api';
+import type { WorkOrder } from '../../../types';
 
-vi.mock('../../api', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../api')>();
+vi.mock('../../../api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../api')>();
   return {
     ...actual,
     workOrderApi: {
@@ -80,6 +80,7 @@ describe('WorkOrderDetail', () => {
     expect(screen.queryByRole('button', { name: '派单' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '开始处理' })).not.toBeInTheDocument();
     expect(screen.getByText('工单已完成全部流转。')).toBeInTheDocument();
+    expect(screen.getByTitle('已完成')).toHaveTextContent('✓');
   });
 
   it('推进失败时展示错误信息', async () => {

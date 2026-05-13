@@ -1,8 +1,8 @@
 # 交付物 2：Bug 修复说明（`DeviceAlertPanel`）
 
-附件 `buggy-component.tsx` 中的告警面板经修复后位于 `src/components/DeviceAlertPanel.tsx`。该文件作为题目要求的**修复后源码**保留；行为验证见 `src/components/__tests__/DeviceAlertPanel.test.tsx`（覆盖 `buildingId` 依赖、定时器清理、不可变状态更新三处修复）。
+题目附件 **`attachments/buggy-component.tsx`** 内含 **3 处故意缺陷**（见该文件注释与 `← 留意这里` 等标记）。修复后的实现位于 **`src/components/DeviceAlertPanel.tsx`**（与附件组件职责一致，并补充表格等展示）；单测 **`src/components/__tests__/DeviceAlertPanel.test.tsx`** 覆盖三处修复行为。
 
-主界面布局与 `attachments/wireframes.md` 一致：**不在设备看板底部挂载**该面板；同一套 Mock 告警数据在 **设备详情弹窗**「最近告警」中以表格展示（级别、**告警内容**、时间、确认状态），数据来自 `GET /api/devices/:id` 返回的 `alerts` 字段。
+主界面与 **`attachments/wireframes.md`** 对齐：**不在设备看板底部挂载**该面板；Mock 告警在 **设备详情弹窗**「最近告警」表格中展示（级别、告警内容、时间、确认状态），数据来自 `GET /api/devices/:id` 的 `alerts`。`DeviceAlertPanel` 仍可作为「附件 Bug 修复」的独立交付对照。
 
 ---
 
@@ -12,7 +12,35 @@
 
 **根因分析**：`useCallback` 的依赖数组写成了 `[]`，函数体闭包的是**初次渲染**时的 `buildingId`。父组件后续传入的新 `buildingId` 不会使 `fetchAlerts` 引用更新，`fetch` 仍使用旧查询参数，属于典型的 React Hooks 陈旧闭包问题。
 
-**修复方法**：将 `buildingId` 加入 `useCallback` 依赖：`useCallback(async () => { ... }, [buildingId])`。这样楼栋变化时会得到新的拉取函数，`useEffect` 依赖 `fetchAlerts` 也会在切换后重新请求正确数据。
+**附件中的问题代码**（`buggy-component.tsx` 约第 49–61 行）：
+
+```ts
+const fetchAlerts = useCallback(async () => {
+  // ...
+  const res = await fetch(`/api/alerts?buildingId=${buildingId}`);
+  // ...
+}, []); // ← 留意这里：未依赖 buildingId
+```
+
+**修复后代码**（`DeviceAlertPanel.tsx`）：
+
+```ts
+const fetchAlerts = useCallback(async () => {
+  setLoading(true);
+  try {
+    const res = await fetch(`/api/alerts?buildingId=${buildingId}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data: Alert[] = await res.json();
+    setAlerts(data);
+  } catch (err) {
+    console.error('Failed to fetch alerts:', err);
+  } finally {
+    setLoading(false);
+  }
+}, [buildingId]);
+```
+
+**修复方法**：将 `buildingId` 写入 `useCallback` 依赖数组，使楼栋变化时 `fetchAlerts` 引用更新，`useEffect(..., [fetchAlerts])` 随之重新拉取。
 
 ---
 
@@ -22,7 +50,28 @@
 
 **根因分析**：`setInterval(fetchAlerts, 5000)` 创建后没有在 `useEffect` 的清理函数中 `clearInterval`；且 `useEffect` 依赖不完整时，每次依赖变化会新建定时器而不销毁旧定时器，造成内存与请求泄漏。
 
-**修复方法**：在开启自动刷新的 `useEffect` 内 `return () => clearInterval(timer)`，并将 `fetchAlerts` 一并写入依赖数组，保证定时器与当前拉取逻辑一致，卸载或关闭自动刷新时定时器被可靠清除。
+**附件中的问题代码**（`buggy-component.tsx` 约第 68–73 行）：
+
+```ts
+useEffect(() => {
+  if (autoRefresh) {
+    const timer = setInterval(fetchAlerts, 5000);
+  }
+}, [autoRefresh]); // 无清理、未依赖 fetchAlerts
+```
+
+**修复后代码**（`DeviceAlertPanel.tsx`）：
+
+```ts
+useEffect(() => {
+  if (autoRefresh) {
+    const timer = setInterval(fetchAlerts, 5000);
+    return () => clearInterval(timer);
+  }
+}, [autoRefresh, fetchAlerts]);
+```
+
+**修复方法**：在 `if (autoRefresh)` 分支内 `return () => clearInterval(timer)`；依赖数组包含 `fetchAlerts`，与当前拉取逻辑一致，避免陈旧闭包与多定时器叠加。
 
 ---
 
@@ -32,10 +81,30 @@
 
 **根因分析**：代码对 `alerts` 数组中的元素就地修改 `alert.acknowledged = true`，再执行 `setAlerts(alerts)`。此时 **数组引用未变**，React 可能判定状态无变化而跳过更新；同时违反「不可变更新」规范，后续维护易产生隐蔽 bug。
 
-**修复方法**：使用函数式更新与不可变数据：`setAlerts((prev) => prev.map((a) => (a.id === alertId ? { ...a, acknowledged: true } : a)))`。为新状态创建新数组与新对象引用，保证重新渲染稳定、可预测。
+**附件中的问题代码**（`buggy-component.tsx` 约第 76–86 行）：
+
+```ts
+const alert = alerts.find((a) => a.id === alertId);
+if (alert) {
+  alert.acknowledged = true;
+  setAlerts(alerts);
+}
+```
+
+**修复后代码**（`DeviceAlertPanel.tsx`）：
+
+```ts
+setAlerts((prevAlerts) =>
+  prevAlerts.map((a) =>
+    a.id === alertId ? { ...a, acknowledged: true } : a
+  )
+);
+```
+
+**修复方法**：使用函数式更新 + `map` 生成新数组、展开运算符生成新对象，保证引用变化，触发可靠重渲染。
 
 ---
 
 ## 小结
 
-以上三点分别对应 **数据与 props 同步**、**副作用清理**、**状态更新规范**，均为 React 常见考点。修复后的组件源码与单测便于评审对照附件中的原始缺陷；若需在看板中再次挂载该面板，只需在 `DeviceDashboardPage` 中引入即可。
+以上三点分别对应 **数据与 props 同步**、**副作用清理**、**状态更新规范**，均为 React 常见考点；与 **`attachments/buggy-component.tsx`** 中的三处缺陷一一对应。修复后的 `DeviceAlertPanel.tsx` 与单测便于评审对照附件；若需在看板底部再次挂载该面板，在 `DeviceDashboardPage` 中引入即可。

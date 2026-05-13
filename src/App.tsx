@@ -5,13 +5,13 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import { MonitorIcon, FileTextIcon, ApartmentIcon } from './icons';
+import { MonitorIcon, FileTextIcon, ApartmentIcon } from './components/icons';
 import aiAssistantIconUrl from './assets/icons/ai-chat-icon.svg';
-import { DeviceDashboardPage } from './pages/DeviceDashboardPage';
+import { DeviceDashboardPage } from './pages/devices/DeviceDashboardPage';
 import { UserAccountMenu } from './components/UserAccountMenu';
 
 const WorkOrdersPage = lazy(() =>
-  import('./pages/WorkOrdersPage').then((m) => ({ default: m.WorkOrdersPage })),
+  import('./pages/work-orders/WorkOrdersPage').then((m) => ({ default: m.WorkOrdersPage })),
 );
 const AIAssistant = lazy(() =>
   import('./components/AIAssistant').then((m) => ({ default: m.AIAssistant })),

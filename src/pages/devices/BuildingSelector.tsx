@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ApartmentIcon } from '../icons';
-import { buildingApi } from '../api';
-import type { Building } from '../types';
+import { ApartmentIcon } from '../../components/icons';
+import { buildingApi } from '../../api';
+import type { Building } from '../../types';
 
 interface BuildingSelectorProps {
   selectedBuilding: string;

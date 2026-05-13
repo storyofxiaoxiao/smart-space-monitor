@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDownIcon } from '../icons';
-import { DEVICE_STATUSES } from '../constants';
+import { ChevronDownIcon } from '../../components/icons';
+import { DEVICE_STATUSES } from '../../constants';
 
 interface StatusFilterProps {
   selectedStatus: string;
